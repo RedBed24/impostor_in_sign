@@ -1,0 +1,22 @@
+[project]
+name = "db_connector"
+version = "0.0.1"
+authors = [
+  { name="Samuel Espejo Gil", email="samuel.espejo@alu.uclm.es" },
+  { name="Elena Ballesteros Morallón", email="elena.ballesteros2@alu.uclm.es" },
+]
+description = "Implementation of db connector for multiagents"
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+        "pymongo==4.10.1",
+        "logging==0.4.9.6",
+]
+
+[project.urls]
+"Repository" = "https://github.com/RedBed24/impostor_in_sign"
