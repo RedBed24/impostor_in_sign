@@ -14,7 +14,24 @@ services:
     volumes:
       - mongo-data:/data/db
       - mongo-log:/var/log/mongodb
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "--quiet",
+          "127.0.0.1/test",
+          "--eval",
+          "'quit(db.runCommand({ ping: 1 }).ok ? 0 : 2)'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
 
 volumes:
   mongo-data:
   mongo-log:
+
+
