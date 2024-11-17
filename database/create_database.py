@@ -1,3 +1,5 @@
+import pickle
+from time import time
 from pymongo import MongoClient
 import os
 from dotenv import load_dotenv
@@ -9,7 +11,7 @@ from hashlib import md5
 
 logging.basicConfig(level=logging.INFO)
 
-def main():
+def upload_to_database():
     load_dotenv()
     USERNAME = os.getenv('MONGO_INITDB_ROOT_USERNAME')
     PASSWORD = os.getenv('MONGO_INITDB_ROOT_PASSWORD')
@@ -29,9 +31,11 @@ def main():
     logging.info(f"Documents in the collection: {count}")
     # Delete collection
 
-    # Download the dataset
+def download_dataset() -> pd.DataFrame:
+    init = time()
     logging.info("Downloading the dataset")
     df = pd.read_parquet("hf://datasets/Marxulia/asl_sign_languages_alphabets_v03/data/train-00000-of-00001.parquet")
+    logging.info(f"Dataset downloaded in {time()-init:.2f} seconds")
 
     df['_id'] = df['image.bytes'].apply(lambda x: md5(x).hexdigest())
     # Create a mapping from numbers to letters
@@ -40,11 +44,20 @@ def main():
     df['label'] = df['label'].astype(int)
     df['label'] = df['label'].map(label_mapping)
 
-    data_to_insert = df.to_dict(orient="records")
+    with open("raw_data.pkl", "wb") as f:
+        pickle.dump(df, f)
 
-    result = raw_images_collection.insert_many(data_to_insert)
+    logging.info("Saved the raw data")
+    return df
 
-    logging.info(f"Inserted {len(result.inserted_ids)} elements")
+def main():
+    if os.path.exists("raw_data.pkl"):
+        with open("raw_data.pkl", "rb") as f:
+            df_raw = pickle.load(f)
+    else:
+        df_raw = download_dataset() # Download the dataset if it doesn't exist
+    df_raw.dropna(inplace=True)
+
 
 
 if __name__ == "__main__":
