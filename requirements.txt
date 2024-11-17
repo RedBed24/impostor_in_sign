@@ -1,5 +1,5 @@
 opencv-python==4.7.0.68
-mediapipe==0.9.0.1
+mediapipe==0.10.18
 scikit-learn==1.2.0
 pymongo==4.10.1
 pandas==2.2.3
