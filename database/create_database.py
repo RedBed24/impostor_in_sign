@@ -11,29 +11,19 @@ import logging
 from hashlib import md5
 
 from utils.hand_points_detection import HandPointsDetector
-
+from apps.db_connector.src.db_connector import MongoDBConnector
 
 logging.basicConfig(level=logging.INFO)
 DETECTOR = HandPointsDetector(min_detection_confidence=0.3, static_image_mode=True)
 
-def upload_to_database():
-    load_dotenv()
-    USERNAME = os.getenv('MONGO_INITDB_ROOT_USERNAME')
-    PASSWORD = os.getenv('MONGO_INITDB_ROOT_PASSWORD')
-
-    if not USERNAME or not PASSWORD:
-        logging.error("Please set the environment variables MONGO_INITDB_ROOT_USERNAME and MONGO_INITDB_ROOT_PASSWORD")
-        return
-    
-    logging.info("Connecting to the database")
-    client = MongoClient("mongodb://localhost:27017/", username = USERNAME, password=PASSWORD) 
-    db = client["impostor_sign"] #schema
-
+def upload_to_database(df: pd.DataFrame) -> None:
+    """Upload the processed data to the database."""
+    db = MongoDBConnector().get_db()
     # Create collection
     raw_images_collection = db["raw_images"]
-    raw_images_collection.drop() #si existe la borra
-    count = raw_images_collection.count_documents({})
-    logging.info(f"Documents in the collection: {count}")
+    raw_images_collection.drop() #if it exists, drop it
+    stats = raw_images_collection.insert_many(df.to_dict('records'))
+    logging.info(f"Uploaded {len(stats.inserted_ids)} images to the database")
 
 def process_row(row) -> pd.DataFrame:
     """Process the image and return the points or an empty DataFrame if no hand is detected.
@@ -114,6 +104,13 @@ def main():
             df_points = pickle.load(f)
     else:
         df_points = process_raw_images(df_raw) # Process the images if they don't exist
+
+    # Filter the original dataset with the processed points
+    df_processed = df_raw.loc[df_raw['_id'].isin(df_points['id'])]
+    with open("processed_data.pkl", "wb") as f:
+        pickle.dump(df_processed, f)
+    
+    upload_to_database(df_processed)
 
 
 if __name__ == "__main__":
