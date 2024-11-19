@@ -2,7 +2,6 @@
 
 import pickle
 from time import time
-from pymongo import MongoClient
 import os
 from dotenv import load_dotenv
 import string
@@ -13,6 +12,7 @@ from hashlib import md5
 from utils.hand_points_detection import HandPointsDetector
 from apps.db_connector.src.db_connector import MongoDBConnector
 
+load_dotenv()
 logging.basicConfig(level=logging.INFO)
 DETECTOR = HandPointsDetector(min_detection_confidence=0.3, static_image_mode=True)
 
