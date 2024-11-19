@@ -1,0 +1,27 @@
+[project]
+name = "impostor-api"
+version = "0.0.1"
+authors = [
+  { name="Samuel Espejo Gil", email="samuel.espejo@alu.uclm.es" },
+  { name="Elena Ballesteros Morallón", email="elena.ballesteros2@alu.uclm.es" },
+]
+description = "Implementation of REST API for multiagents"
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "logging==0.4.9.6",
+    "pydantic==2.9.2",
+    "fastapi[standard]",
+    "db_connector",
+]
+
+[project.optional-dependencies]
+tests = ["pytest"]
+
+[project.urls]
+"Repository" = "https://github.com/RedBed24/impostor_in_sign"
