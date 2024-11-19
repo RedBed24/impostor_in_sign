@@ -18,7 +18,7 @@ class HandPointsDetector:
             min_tracking_confidence=min_tracking_confidence
         )
 
-    def process_image(self, img)-> None | tuple[list[Any], list[Any]]:
+    def process_image(self, img: bytes)-> None | tuple[list[Any], list[Any]]:
         """Processes the bytes image and returns the hand points or None if no hand is detected."""
         img_np = np.frombuffer(img, np.uint8) #byes to numpy array
 
