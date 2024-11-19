@@ -8,6 +8,11 @@ import string
 import pandas as pd
 import logging
 from hashlib import md5
+from sklearn.model_selection import train_test_split, RandomizedSearchCV
+from sklearn.ensemble import RandomForestClassifier
+from scipy.stats import randint
+from sklearn.metrics import accuracy_score
+
 
 from utils.hand_points_detection import HandPointsDetector
 from apps.db_connector.src.db_connector import MongoDBConnector
@@ -91,6 +96,48 @@ def download_dataset() -> pd.DataFrame:
     logging.info("Saved the raw data")
     return df
 
+def train_evaluate(model, X, y):
+    """Train the model and evaluate it on the test set.
+    Returns the accuracy and the best model found."""
+
+    logging.info("Training the model")
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y)
+
+    # Hyperparameter search
+    param_dist_random = {
+        'n_estimators': randint(50, 200),
+        'max_depth': [None, 5, 10, 15, 20, 30],
+        'min_samples_split': randint(2, 8),
+        'min_samples_leaf': randint(1, 5)
+    }
+    random_search = RandomizedSearchCV(estimator=model, param_distributions=param_dist_random,
+                                    n_iter=50, cv=5, n_jobs=-1, verbose=2, scoring='f1_macro', refit=True)
+    # Fit the Random Search model
+    random_search.fit(X_train, y_train)
+    best_model = random_search.best_estimator_
+    logging.info("Finished training the model")
+
+    # Evaluate on the test set
+    y_pred = best_model.predict(X_test)
+    accuracy = accuracy_score(y_test, y_pred)
+    
+    logging.info(f"Accuracy on test set: {accuracy}")
+    return accuracy, best_model
+
+
+def create_model(dataset: pd.DataFrame, target_str: str = 'label') -> None:
+    """Creates a Random Forest Classifier model, trains it and if the accuracy is above 0.5, saves it."""
+    model =  RandomForestClassifier(class_weight='balanced')
+    X = dataset.drop(columns=[target_str], axis=1)
+    accuracy = 0
+    while accuracy < 0.5:
+        accuracy, best_model = train_evaluate(model, X, dataset[target_str])
+    
+    with open("model.pkl", "wb") as f:
+        pickle.dump(best_model, f)
+    logging.info("Model saved")
+
+
 def main():
     if os.path.exists("raw_data.pkl"):
         with open("raw_data.pkl", "rb") as f:
@@ -111,7 +158,11 @@ def main():
         pickle.dump(df_processed, f)
     
     upload_to_database(df_processed)
-
+    
+    # If the model doesn't exist, create it
+    if not os.path.exists("model.pkl"):
+        df_points.set_index('id', inplace=True)
+        create_model(df_points)
 
 if __name__ == "__main__":
     main()
