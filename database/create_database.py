@@ -22,10 +22,11 @@ logging.basicConfig(level=logging.INFO)
 DETECTOR = HandPointsDetector(min_detection_confidence=0.3, static_image_mode=True)
 
 def upload_to_database(df: pd.DataFrame) -> None:
-    """Upload the processed data to the database."""
+    """Upload the processed data to the database.
+    :param df: DataFrame with the processed images."""
     db = MongoDBConnector().get_db()
-    # Create collection
-    raw_images_collection = db["raw_images"]
+    
+    raw_images_collection = db["raw_images"] # Create collection
     raw_images_collection.drop() #if it exists, drop it
     stats = raw_images_collection.insert_many(df.to_dict('records'))
     logging.info(f"Uploaded {len(stats.inserted_ids)} images to the database")
@@ -33,6 +34,9 @@ def upload_to_database(df: pd.DataFrame) -> None:
 def process_row(row) -> pd.DataFrame:
     """Process the image and return the points or an empty DataFrame if no hand is detected.
     The DataFrame contains the x and y coordinates of the 21 hand points, id and label.
+
+    :param row: row of the DataFrame with the image data.
+    :return: DataFrame with the points or an empty DataFrame if no hand is detected.
     """
     points = DETECTOR.process_image(row['image.bytes'])
     if points is None:
@@ -51,7 +55,11 @@ def process_row(row) -> pd.DataFrame:
 
 
 def process_raw_images(df_images: pd.DataFrame) -> pd.DataFrame:
-    """Create points from the images and drop the empty ones."""
+    """Create points from the images and drop the empty ones.
+    
+    :param df_images: DataFrame with the raw images.
+    :return: DataFrame with the processed points.
+    """
     results = []
     for i in range(0, len(df_images), 1000): # Process the images in batches of 1000
         init = time()
@@ -77,6 +85,8 @@ def download_dataset() -> pd.DataFrame:
         - image.bytes: bytes of the image
         - image.path: name of the image
         - label: letter of the alphabet
+
+    :return: DataFrame with the dataset.
     """
     init = time()
     logging.info("Downloading the dataset")
@@ -98,7 +108,13 @@ def download_dataset() -> pd.DataFrame:
 
 def train_evaluate(model, X, y):
     """Train the model and evaluate it on the test set.
-    Returns the accuracy and the best model found."""
+    Returns the accuracy and the best model found.
+
+    :param model: model to train
+    :param X: features
+    :param y: target
+    :return: accuracy and best model
+    """
 
     logging.info("Training the model")
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y)
@@ -126,7 +142,11 @@ def train_evaluate(model, X, y):
 
 
 def create_model(dataset: pd.DataFrame, target_str: str = 'label') -> None:
-    """Creates a Random Forest Classifier model, trains it and if the accuracy is above 0.5, saves it."""
+    """Creates a Random Forest Classifier model, trains it and if the accuracy is above 0.5, saves it.
+    
+    :param dataset: DataFrame with the processed points.
+    :param target_str: target column name.
+    """
     model =  RandomForestClassifier(class_weight='balanced')
     X = dataset.drop(columns=[target_str], axis=1)
     accuracy = 0
