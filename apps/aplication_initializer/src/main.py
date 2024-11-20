@@ -13,7 +13,7 @@ from sklearn.ensemble import RandomForestClassifier
 from scipy.stats import randint
 from sklearn.metrics import accuracy_score
 
-from utils.hand_points_detection import HandPointsDetector
+from apps.hand_detector.src.hand_detector import HandPointsDetector
 from apps.db_connector.src.db_connector import MongoDBConnector
 
 load_dotenv()
