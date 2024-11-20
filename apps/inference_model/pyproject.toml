@@ -18,6 +18,8 @@ dependencies = [
     "pydantic==2.9.2",
     "fastapi[standard]",
     "mediapipe==0.10.18",
+    "opencv-python==4.7.0.68", 
+    "hand_detector",
 ]
 
 

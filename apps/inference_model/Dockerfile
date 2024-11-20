@@ -5,8 +5,8 @@ WORKDIR /apps/inference_model
 COPY inference_model /apps/inference_model
 
 # Copy the db_connector package to the container
-COPY db_connector /apps/db_connector
-RUN pip install /apps/db_connector
+COPY hand_detector /apps/hand_detector
+RUN pip install /apps/hand_detector
 
 # Install curl
 RUN apt-get update && apt-get install -y curl
@@ -17,4 +17,4 @@ RUN pip install .
 EXPOSE 8000
 
 # Command to run the FastAPI application
-CMD ["python3", "src/main.py"]
+CMD ["fastapi", "run", "src/main.py"]
