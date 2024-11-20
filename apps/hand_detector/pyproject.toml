@@ -17,7 +17,7 @@ dependencies = [
     "pymongo==4.10.1",
     "logging==0.4.9.6",
     "mediapipe==0.10.18",
-    "opencv-python==4.7.0.68",
+    "opencv-contrib-python==4.10.0.84",
 ]
 
 [project.urls]

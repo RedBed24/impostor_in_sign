@@ -2,7 +2,7 @@ from fastapi import FastAPI, File, UploadFile
 import pickle
 import pandas as pd
 from contextlib import asynccontextmanager
-from apps.hand_detector.src.hand_detector import HandPointsDetector
+from hand_detector import HandPointsDetector
 
 DETECTOR = HandPointsDetector(min_detection_confidence=0.3, static_image_mode=True)
 
@@ -12,7 +12,7 @@ DETECTOR = HandPointsDetector(min_detection_confidence=0.3, static_image_mode=Tr
 async def lifespan(app: FastAPI):
     """Load the model when the server starts and delete it when the server stops"""
     global model
-    model = pickle.load(open("random_forest_model.pkl", "rb"))
+    model = pickle.load(open("/apps/application_initializer/pickles/random_forest_model.pkl", "rb"))
     yield # pause method execution
     del model
 
