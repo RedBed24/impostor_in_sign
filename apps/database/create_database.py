@@ -28,9 +28,11 @@ def upload_to_database(df: pd.DataFrame) -> None:
     db = MongoDBConnector().get_db()
     
     raw_images_collection = db["raw_images"] # Create collection
-    raw_images_collection.drop() #if it exists, drop it
-    stats = raw_images_collection.insert_many(df.to_dict('records'))
-    logging.info(f"Uploaded {len(stats.inserted_ids)} images to the database")
+    count = raw_images_collection.find_one() # Check if the collection is empty
+    if count is None:
+        stats = raw_images_collection.insert_many(df.to_dict('records'))
+        logging.info(f"Uploaded {len(stats.inserted_ids)} images to the database")
+    logging.info("Database created")
 
 def process_row(row) -> pd.DataFrame:
     """Process the image and return the points or an empty DataFrame if no hand is detected.
