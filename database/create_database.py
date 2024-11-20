@@ -13,13 +13,14 @@ from sklearn.ensemble import RandomForestClassifier
 from scipy.stats import randint
 from sklearn.metrics import accuracy_score
 
-
 from utils.hand_points_detection import HandPointsDetector
 from apps.db_connector.src.db_connector import MongoDBConnector
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
 DETECTOR = HandPointsDetector(min_detection_confidence=0.3, static_image_mode=True)
+PICKLES_FOLDER = "pickles"
+
 
 def upload_to_database(df: pd.DataFrame) -> None:
     """Upload the processed data to the database.
@@ -72,7 +73,7 @@ def process_raw_images(df_images: pd.DataFrame) -> pd.DataFrame:
     
     df = pd.concat(results, ignore_index=True)
     
-    with open("processed_points_data.pkl", "wb") as f:
+    with open(PICKLES_FOLDER + "processed_points_data.pkl", "wb") as f:
         pickle.dump(df, f)
     logging.info("Saved the processed data")
     return df
@@ -100,7 +101,7 @@ def download_dataset() -> pd.DataFrame:
     df['label'] = df['label'].astype(int)
     df['label'] = df['label'].map(label_mapping)
 
-    with open("raw_data.pkl", "wb") as f:
+    with open(PICKLES_FOLDER+ "raw_data.pkl", "wb") as f:
         pickle.dump(df, f)
 
     logging.info("Saved the raw data")
@@ -153,34 +154,34 @@ def create_model(dataset: pd.DataFrame, target_str: str = 'label') -> None:
     while accuracy < 0.5:
         accuracy, best_model = train_evaluate(model, X, dataset[target_str])
     
-    with open("model.pkl", "wb") as f:
+    with open(PICKLES_FOLDER + "random_forest_model.pkl", "wb") as f:
         pickle.dump(best_model, f)
     logging.info("Model saved")
 
 
 def main():
-    if os.path.exists("raw_data.pkl"):
-        with open("raw_data.pkl", "rb") as f:
+    if os.path.exists(PICKLES_FOLDER + "raw_data.pkl"):
+        with open(PICKLES_FOLDER + "raw_data.pkl", "rb") as f:
             df_raw = pickle.load(f)
     else:
         df_raw = download_dataset() # Download the dataset if it doesn't exist
     df_raw.dropna(inplace=True)
 
-    if os.path.exists("processed_points_data.pkl"):
-        with open("processed_points_data.pkl", "rb") as f:
+    if os.path.exists(PICKLES_FOLDER + "processed_points_data.pkl"):
+        with open(PICKLES_FOLDER + "processed_points_data.pkl", "rb") as f:
             df_points = pickle.load(f)
     else:
         df_points = process_raw_images(df_raw) # Process the images if they don't exist
 
     # Filter the original dataset with the processed points
     df_processed = df_raw.loc[df_raw['_id'].isin(df_points['id'])]
-    with open("processed_data.pkl", "wb") as f:
+    with open(PICKLES_FOLDER + "processed_data.pkl", "wb") as f:
         pickle.dump(df_processed, f)
     
     upload_to_database(df_processed)
     
     # If the model doesn't exist, create it
-    if not os.path.exists("model.pkl"):
+    if not os.path.exists(PICKLES_FOLDER + "random_forest_model.pkl"):
         df_points.set_index('id', inplace=True)
         create_model(df_points)
 
