@@ -1,0 +1,30 @@
+[project]
+name = "impostor-aplication_initializer"
+version = "0.0.1"
+authors = [
+  { name="Samuel Espejo Gil", email="samuel.espejo@alu.uclm.es" },
+  { name="Elena Ballesteros Morallón", email="elena.ballesteros2@alu.uclm.es" },
+]
+description = "Scripts for initialize the application"
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "logging==0.4.9.6",
+    "pydantic==2.9.2",
+    "python-dotenv==1.0.1",
+    "scikit-learn==1.5.2",
+    "pandas==2.2.3",
+    "fastparquet==2024.5.0",
+    "huggingface-hub==0.26.2",
+    "db_connector",
+    "hand_detector",
+]
+
+
+[project.urls]
+"Repository" = "https://github.com/RedBed24/impostor_in_sign"
