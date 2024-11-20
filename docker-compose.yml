@@ -50,6 +50,23 @@ services:
     volumes:
       - apps:/app/aplication_initializer
 
+  inference_model:
+    container_name: impostor-inference-model
+    build:
+      context: apps
+      dockerfile: inference-model/Dockerfile
+    ports:
+      -"8000:8080"
+    volumes:
+      - apps:/app/inference_model
+    restart: on-failure
+    healthcheck:
+      test: curl --fail http://localhost:8000/health || exit 1
+      interval: 2s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
 volumes:
   mongo-data:
   mongo-log:
