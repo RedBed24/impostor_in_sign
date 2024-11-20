@@ -41,6 +41,13 @@ services:
       MONGO_DB_URL: "mongodb://impostor-database:27017"
     ports:
       - "8000:8000"
+    restart: on-failure
+    healthcheck:
+      test: curl --fail http://localhost:8000/iamalive || exit 1
+      interval: 2s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
 
 volumes:
   mongo-data:

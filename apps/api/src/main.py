@@ -9,6 +9,10 @@ app = FastAPI(
     on_shutdown=[lambda: MongoDBConnector().close_connection()],
 )
 
+@app.get("/iamalive")
+async def iamalive() -> dict:
+    return {"status": "alive"}
+
 
 @app.get("/api/img")
 async def get_imgs(limit: int = 5) -> dict:
