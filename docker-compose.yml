@@ -42,6 +42,15 @@ services:
     ports:
       - "8000:8000"
 
+  aplication_initializer:
+    container_name: impostor-aplication-initializer
+    build:
+      context: apps
+      dockerfile: aplication-initializer/Dockerfile
+    volumes:
+      - apps:/app/aplication_initializer
+
 volumes:
   mongo-data:
   mongo-log:
+  apps:
