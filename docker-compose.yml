@@ -42,21 +42,33 @@ services:
     ports:
       - "8000:8000"
 
-  aplication_initializer:
-    container_name: impostor-aplication-initializer
+  application_initializer:
+    container_name: impostor-application-initializer
+    depends_on:
+      database:
+        condition: service_healthy      
     build:
       context: apps
-      dockerfile: aplication-initializer/Dockerfile
+      dockerfile: application_initializer/Dockerfile
+    env_file:
+      - .env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "${MONGO_INITDB_ROOT_USERNAME}"
+      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_INITDB_ROOT_PASSWORD}"
+      MONGO_DB_URL: "mongodb://impostor-database:27017"
     volumes:
-      - apps:/app/aplication_initializer
+      - apps:/app/application_initializer
 
   inference_model:
     container_name: impostor-inference-model
+    depends_on:
+      application_initializer:
+        condition: service_completed_successfully
     build:
       context: apps
-      dockerfile: inference-model/Dockerfile
+      dockerfile: inference_model/Dockerfile
     ports:
-      -"8000:8080"
+      - "8080:8000"
     volumes:
       - apps:/app/inference_model
     restart: on-failure
