@@ -8,6 +8,9 @@ COPY api /apps/api
 COPY db_connector /apps/db_connector
 RUN pip install /apps/db_connector
 
+# Install curl
+RUN apt-get update && apt-get install -y curl
+
 # Install the dependencies
 RUN pip install .
 
