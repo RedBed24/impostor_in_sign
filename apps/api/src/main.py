@@ -71,7 +71,8 @@ async def delete_img(img_id: str, current_user:Annotated[str, Depends(get_curren
 
 @app.put("/api/img/")
 async def create_img(
-    label: str = Form(...), file: UploadFile = File(...)
+    current_user:Annotated[str, Depends(get_current_user)],
+    label: str = Form(...), file: UploadFile = File(...),
 ) -> dict[str, str]:
     db = MongoDBConnector.get_db()
     img_bytes = await file.read()
@@ -88,7 +89,7 @@ class Label(BaseModel):
 
 
 @app.post("/api/img/{img_id}")
-async def post_img(img_id: str, new_label: Label) -> dict:
+async def post_img(img_id: str, new_label: Label, current_user:Annotated[str, Depends(get_current_user)]) -> dict:
     db = MongoDBConnector.get_db()
     result = db.raw_images.update_one({"_id": img_id}, {"$set": new_label.model_dump()})
     if result.matched_count == 0:
