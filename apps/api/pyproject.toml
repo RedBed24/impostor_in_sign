@@ -18,6 +18,7 @@ dependencies = [
     "pydantic==2.9.2",
     "fastapi[standard]",
     "db_connector",
+    "pyjwt"
 ]
 
 [project.optional-dependencies]
