@@ -77,8 +77,10 @@ async def create_img(
     img_bytes = await file.read()
     id = md5(img_bytes).hexdigest()
     img = {"label": label, "image.bytes": img_bytes, "_id": id}
-    db.raw_images.insert_one(img)
-    return {"status": "inserted"}
+    result = db.raw_images.insert_one(img)
+    if not result.inserted_id:
+        return {"status": "failed", "message": "Insert operation failed"}
+    return {"status": "inserted", "id": str(result.inserted_id)}
 
 
 class Label(BaseModel):
@@ -88,7 +90,11 @@ class Label(BaseModel):
 @app.post("/api/img/{img_id}")
 async def post_img(img_id: str, new_label: Label) -> dict:
     db = MongoDBConnector.get_db()
-    db.raw_images.update_one({"_id": img_id}, {"$set": new_label.model_dump()})
+    result = db.raw_images.update_one({"_id": img_id}, {"$set": new_label.model_dump()})
+    if result.matched_count == 0:
+        return {"status": "not found", "message": "Document with given ID not found"}
+    if result.modified_count == 0:
+        return {"status": "not modified", "message": "No changes applied"}
     return {"status": "updated"}
 
 @app.get("/iamalive")
