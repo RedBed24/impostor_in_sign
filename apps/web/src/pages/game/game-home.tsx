@@ -1,4 +1,5 @@
 import { Container, Title } from '@mantine/core';
+import { LucideGamepad } from 'lucide-react';
 
 export const GameHome: React.FC = () => {
 
@@ -6,6 +7,7 @@ export const GameHome: React.FC = () => {
     <>
       <Container>
         <Title>Impostor in Sign</Title>
+        <LucideGamepad />
       </Container>
     </>
   );
