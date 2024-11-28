@@ -2,7 +2,7 @@ services:
   database:
     container_name: impostor-database
     image: mongo:8.0.3
-    restart: always
+    restart: unless-stopped
     env_file:
       - .env
     environment:
@@ -41,7 +41,7 @@ services:
       MONGO_DB_URL: "mongodb://impostor-database:27017"
     ports:
       - "8000:8000"
-    restart: on-failure
+    restart: unless-stopped
     healthcheck:
       test: curl --fail http://localhost:8000/iamalive || exit 1
       interval: 2s
@@ -78,7 +78,7 @@ services:
       - "8080:8000"
     volumes:
       - apps:/app/inference_model
-    restart: on-failure
+    restart: unless-stopped
     healthcheck:
       test: curl --fail http://localhost:8000/iamalive || exit 1
       interval: 2s
@@ -86,6 +86,16 @@ services:
       retries: 3
       start_period: 5s
 
+  web:
+    container_name: impostor-web
+    build: 
+      context: apps
+      dockerfile: web/Dockerfile
+    ports:
+      - "80:5173"
+    depends_on:
+      api:
+        condition: service_healthy    
 volumes:
   mongo-data:
   mongo-log:
