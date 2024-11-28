@@ -20,6 +20,7 @@ dependencies = [
     "mediapipe==0.10.18",
     "scikit-learn==1.5.2",
     "hand_detector",
+    "pandas==2.2.3",
 ]
 
 

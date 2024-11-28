@@ -3,7 +3,6 @@
 import pickle
 from time import time
 import os
-from dotenv import load_dotenv
 import string
 import pandas as pd
 import logging
@@ -16,22 +15,22 @@ from sklearn.metrics import accuracy_score
 from hand_detector import HandPointsDetector
 from db_connector import MongoDBConnector
 
-load_dotenv()
 logging.basicConfig(level=logging.INFO)
 DETECTOR = HandPointsDetector(min_detection_confidence=0.3, static_image_mode=True)
-PICKLES_FOLDER = "pickles"
+PICKLES_FOLDER = "/shared-data/pickles/"
 
 
 def upload_to_database(df: pd.DataFrame) -> None:
     """Upload the processed data to the database.
     :param df: DataFrame with the processed images."""
+    init = time()
     db = MongoDBConnector().get_db()
     
     raw_images_collection = db["raw_images"] # Create collection
     count = raw_images_collection.find_one() # Check if the collection is empty
     if count is None:
         stats = raw_images_collection.insert_many(df.to_dict('records'))
-        logging.info(f"Uploaded {len(stats.inserted_ids)} images to the database")
+        logging.info(f"Uploaded {len(stats.inserted_ids)} images to the database in {time()-init:.2f} seconds")
     logging.info("Database created")
 
 def process_row(row) -> pd.DataFrame:
@@ -130,7 +129,7 @@ def train_evaluate(model, X, y):
         'min_samples_leaf': randint(1, 5)
     }
     random_search = RandomizedSearchCV(estimator=model, param_distributions=param_dist_random,
-                                    n_iter=50, cv=5, n_jobs=-1, verbose=2, scoring='f1_macro', refit=True)
+                                    n_iter=50, cv=5, n_jobs=-1, verbose=0, scoring='f1_macro', refit=True)
     # Fit the Random Search model
     random_search.fit(X_train, y_train)
     best_model = random_search.best_estimator_
@@ -150,21 +149,27 @@ def create_model(dataset: pd.DataFrame, target_str: str = 'label') -> None:
     :param dataset: DataFrame with the processed points.
     :param target_str: target column name.
     """
+    init = time()
     model =  RandomForestClassifier(class_weight='balanced')
     X = dataset.drop(columns=[target_str], axis=1)
     accuracy = 0
-    while accuracy < 0.5:
+    while accuracy < 0.6:
         accuracy, best_model = train_evaluate(model, X, dataset[target_str])
     
     with open(PICKLES_FOLDER + "random_forest_model.pkl", "wb") as f:
         pickle.dump(best_model, f)
-    logging.info("Model saved")
+    logging.info(f"Model trained and saved in {time()-init:.2f} seconds")
 
 
 def main():
+    if not os.path.exists(PICKLES_FOLDER):
+        os.makedirs(PICKLES_FOLDER)
+        logging.info("Created pickles folder")
+    logging.info(f"PATH = {os.path.abspath(PICKLES_FOLDER)}")
     if os.path.exists(PICKLES_FOLDER + "raw_data.pkl"):
         with open(PICKLES_FOLDER + "raw_data.pkl", "rb") as f:
             df_raw = pickle.load(f)
+            logging.info("Loaded raw data")
     else:
         df_raw = download_dataset() # Download the dataset if it doesn't exist
     df_raw.dropna(inplace=True)
@@ -172,6 +177,7 @@ def main():
     if os.path.exists(PICKLES_FOLDER + "processed_points_data.pkl"):
         with open(PICKLES_FOLDER + "processed_points_data.pkl", "rb") as f:
             df_points = pickle.load(f)
+            logging.info("Loaded processed data")
     else:
         df_points = process_raw_images(df_raw) # Process the images if they don't exist
 
@@ -179,13 +185,18 @@ def main():
     df_processed = df_raw.loc[df_raw['_id'].isin(df_points['id'])]
     with open(PICKLES_FOLDER + "processed_data.pkl", "wb") as f:
         pickle.dump(df_processed, f)
+        logging.info("Saved processed data")
+        logging.info(f"File was saved? {os.path.exists(PICKLES_FOLDER + 'processed_data.pkl')}")
     
     upload_to_database(df_processed)
     
     # If the model doesn't exist, create it
-    if not os.path.exists(PICKLES_FOLDER + "random_forest_model.pkl"):
+    if os.path.exists(PICKLES_FOLDER + "random_forest_model.pkl"):
+        logging.info("Model already exists")
+    else:
         df_points.set_index('id', inplace=True)
         create_model(df_points)
+        
 
 if __name__ == "__main__":
     main()
