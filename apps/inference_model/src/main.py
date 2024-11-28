@@ -36,9 +36,8 @@ def detect_points(img_bytes: bytes) -> pd.DataFrame:
     df = pd.concat([x_expanded, y_expanded], axis=1)
     return df
 
-@app.get("/predict")
+@app.post("/predict")
 async def predict(file: UploadFile = File(...)):
-    """¿que en predict le mandemos una imagen, la procese y nos devuelva la letra que es?"""
     img_bytes = await file.read()
     df = detect_points(img_bytes)
     if df.empty:
