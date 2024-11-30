@@ -1,45 +1,66 @@
-import { Container, Title, Button, Text, Group } from '@mantine/core';
-import { LucideGamepad, Check, X } from 'lucide-react';
+import { Container, Title, Text, Group, Box } from '@mantine/core';
+// import { Check, X } from 'lucide-react';
 import Webcam from "react-webcam";
-import { useRef, useState, useCallback, useEffect } from "react";
-import { NodeJS } from 'node';
+import { useRef, useState, useEffect } from "react";
+import AmongusLetter from '../../components/amongus_letter';
 
-const videoConstraints = { 
+const videoConstraints = {
   width: 300,
   height: 300,
   facingMode: "user"
 };
 
-// onUserMediaError
 export const GameHome: React.FC = () => {
-  const [isCaptureEnable, setCaptureEnable] = useState<boolean>(false);
-  const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
   const webcamRef = useRef<Webcam>(null);
-  const [url, setUrl] = useState<string | null>(null);
   const [prediction, setPrediction] = useState<string | null>(null);
-  
-  const capture = useCallback(() => {
-    const imageSrc = webcamRef.current?.getScreenshot();
-    if (imageSrc) {
-      setUrl(imageSrc);
-      // Enviar la captura a la URL deseada
-      fetch('http://localhost:8080/predict', {
-        method: 'POST',
-        body: (() => {
-          const formData = new FormData();
-          formData.append('file', dataURItoBlob(imageSrc), 'screenshot.jpg');
-          return formData;
-        })(),
-      })
-      .then(response => response.json())
-      .then(data => {
-        setPrediction(data.prediction);
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
-    }
-  }, [webcamRef]);
+  const [isCameraReady, setCameraReady] = useState(false);
+
+
+  const handleUserMedia = () => {
+    console.log("Cámara lista");
+    setCameraReady(false);
+  };
+
+  useEffect(() => {
+    if (!isCameraReady) return;
+
+    let running = true;
+
+    const captureAndSendFrame = async () => {
+      await new Promise(resolve => setTimeout(resolve, 1000)); //cambia demasiado
+      if (!running || !webcamRef.current) return;
+
+      // Capturar la imagen de la cámara como una base64
+      const imageSrc = webcamRef.current?.getScreenshot();
+      if (!imageSrc) {
+        console.error("No se pudo capturar una imagen desde la cámara.");
+      }
+      if (imageSrc) {
+        const formData = new FormData();
+        formData.append('file', dataURItoBlob(imageSrc), 'screenshot.jpg');
+        try {
+          console.log('Enviando al backend...');
+          // Enviar al backend
+          const response = await fetch('/predict', {
+            method: 'POST',
+            body: formData,
+          });
+          const data = await response.json();
+          setPrediction(data.prediction);
+        } catch (error) {
+          console.error('Error al enviar al backend:', error);
+        }
+      }
+
+      requestAnimationFrame(captureAndSendFrame);
+    };
+    captureAndSendFrame();
+
+    // Limpiar el bucle cuando se desmonte el componente
+    return () => {
+      running = false;
+    };
+  }, [isCameraReady]);
 
   function dataURItoBlob(dataURI: string) {
     const byteString = atob(dataURI.split(',')[1]);
@@ -52,71 +73,39 @@ export const GameHome: React.FC = () => {
     return new Blob([ab], { type: mimeString });
   }
 
-  useEffect(() => {
-    if (isCaptureEnable) {
-      const id = setInterval(capture, 100); // 100 ms = 0.1 segundos
-      setIntervalId(id);
-    } else if (intervalId) {
-      clearInterval(intervalId);
-      setIntervalId(null);
-    }
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [isCaptureEnable, capture, intervalId]);
 
-  const alphabet = [
-    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
-    "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"
-  ];
-
-  // Estado para la letra seleccionada
-  const [currentLetter, setCurrentLetter] = useState("");
-
-  // Función para generar una letra aleatoria
-  const generateRandomLetter = () => {
-    const randomIndex = Math.floor(Math.random() * alphabet.length);
-    setCurrentLetter(alphabet[randomIndex]);
-  };
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////
   return (
     <>
       <Container>
         <Title>Impostor in Sign</Title>
-        <LucideGamepad />
-        {isCaptureEnable || (
-          <Button onClick={() => setCaptureEnable(true)}>start</Button>
-        )}
+        <Text fz={35} m={30}>PREDICTION: {prediction}</Text>
 
-         {isCaptureEnable && (
-        <>
-            <Button onClick={() => setCaptureEnable(false)}>end </Button>
-            <Group>
+        <Group gap='xs'>
+          <Box
+            style={{
+              border: "5px solid #4a90e2",
+              borderRadius: "10px",
+              width: "310px",
+              height: "310px",
+              margin: "auto",
+              overflow: "hidden",
+            }}
+          >
             <Webcam
               audio={false}
-              width={540}
-              height={360}
               ref={webcamRef}
               screenshotFormat="image/jpeg"
               videoConstraints={videoConstraints}
               mirrored={true}
               imageSmoothing={true}
+              onUserMedia={handleUserMedia}
             />
-            {currentLetter.toLowerCase() === prediction?.toLowerCase() ? <Check size={48} /> : <X size={48}/>}
-            </Group>
-        </>
-      )}
-      <Text>PREDICTION: {prediction}</Text>
-      <Group> 
-        <Button onClick={generateRandomLetter}>
-          Generar Letra
-        </Button>
-      <Text>LETTER : {currentLetter}</Text>
-      </Group>
+          </Box>
+          <AmongusLetter prediction={prediction} />
 
+        </Group>
       </Container>
     </>
   );
