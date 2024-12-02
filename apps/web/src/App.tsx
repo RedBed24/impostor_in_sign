@@ -6,7 +6,7 @@ export const App: React.FC = () => {
 
   return (
     <>
-      <Container>
+      <Container p={0} m={0}>
         <Link href='/game'>
           <Button>Go to Game</Button>
         </Link>
