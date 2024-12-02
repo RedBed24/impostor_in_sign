@@ -5,10 +5,10 @@ import { useSpring, animated } from '@react-spring/web';
 interface AmongusLetterProps {
   prediction: string | null;
   speed: number;
-  isPaused: boolean | null;
+  isPaused: boolean;
 }
 
-const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaused = false }) => {
+const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaused }) => {
   const [correct, setCorrect] = useState<boolean>(false);
   const [letter, setLetter] = useState<string>('');
   const [background, setBackground] = useState<string>('white');
@@ -35,12 +35,14 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
 
   // Actualizamos los sprites a intervalos regulares
   useEffect(() => {
+    if (isPaused) return;
+
     const interval = setInterval(() => {
       setImageIndex((prevIndex) => (prevIndex % 12) + 1);
     }, frameDuration);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isPaused]);
 
   useEffect(() => {
     let animationFrame: number;
@@ -89,19 +91,22 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
         return newPosition;
       });
 
-      animationFrame = requestAnimationFrame(animate); // Continuar la animación
+      if (!isPaused) { // continuar la animación, si está pausado no se ejecuta
+        animationFrame = requestAnimationFrame(animate);
+      }
     };
 
     animationFrame = requestAnimationFrame(animate);
 
     return () => cancelAnimationFrame(animationFrame); // Limpiar el frame al desmontar el componente
-  }, [speed, movingVertically, correct, verticalPosition]);
+  }, [speed, movingVertically, correct, verticalPosition, isPaused]);
 
   // Usar React Spring para animar el movimiento
   const { left } = useSpring({
     left: position,
     top: verticalPosition,
     config: { tension: 170, friction: 26 },
+    pause: isPaused,
   });
 
   // Generar una letra aleatoria
