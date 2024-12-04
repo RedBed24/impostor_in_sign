@@ -1,4 +1,4 @@
-import { Container, Title, Text, Group, Box, BackgroundImage, Grid, Button, Skeleton, Modal, Stack } from '@mantine/core';
+import { Container, Title, Text, Group, Box, BackgroundImage, Grid, Button, Skeleton, Modal, Stack, Image } from '@mantine/core';
 import { Pause, Play, LogOut } from 'lucide-react';
 
 import Webcam from "react-webcam";
@@ -17,7 +17,8 @@ export const GamePlay: React.FC = () => {
     const [prediction, setPrediction] = useState<string | null>(null);
     const [isCameraReady, setCameraReady] = useState(false);
     const [isPaused, setIsPaused] = useState(true);
-    
+    const [life, setLife] = useState(3);
+    const [score, setScore] = useState(0);
 
 
     //test
@@ -109,9 +110,15 @@ export const GamePlay: React.FC = () => {
                 }}
             >
                 <Grid p={0}>
-                    <Grid.Col span={8}>
-                        <Group style={{ width: '100%' }}>
-                            <Text fz={35} m={60} c='white'>PREDICTION: {prediction}</Text>
+                    <Grid.Col span={8} mt={30}>
+                        <Group style={{ width: '100%' }} display='flex' align='flex-start'>
+                        <Box p={10} style={{ display: 'flex', flexDirection: 'row', justifyContent:'flex-start',
+                            border: "3px solid #FFFFFF",
+                            borderRadius: "15px", align:'flex-start', marginLeft: 30, marginRight:150}}>
+                                <Image width={50} height={50} src={life > 0 ? "/src/assets/vida.png": "/src/assets/muerte.png"}/>
+                                <Image width={50} height={50} src={life >=2 ? "/src/assets/vida.png": "/src/assets/muerte.png"}/>
+                                <Image width={50} height={50} src={life== 3 ? "/src/assets/vida.png": "/src/assets/muerte.png"}/>
+                            </Box>
                             <Box ml={60}
                                 style={{
                                     height: "210px",
@@ -128,13 +135,15 @@ export const GamePlay: React.FC = () => {
                                     onUserMedia={handleUserMedia}
                                 />
                             </Box>
+                            <Text fz={30} c='white'>PREDICTION: {prediction}</Text>
                         </Group>
                     </Grid.Col>
                     <Grid.Col span={4} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <Text fz={30} c='white' mr={50}>SCORE: {score}</Text>
                         <Button size="xl" onClick={() => setIsPaused(true)}><Pause/> </Button>
                     </Grid.Col>
                     <Grid.Col style={{ position: 'absolute', top: '57%' }}>
-                        <AmongusLetter prediction={prediction} speed={3} isPaused={isPaused} />
+                        <AmongusLetter prediction={prediction} speed={5} isPaused={isPaused} color='red'/>
                     </Grid.Col>
                 </Grid>
 

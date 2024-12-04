@@ -6,9 +6,10 @@ interface AmongusLetterProps {
   prediction: string | null;
   speed: number;
   isPaused: boolean;
+  color: string | null;
 }
 
-const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaused }) => {
+const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaused, color = 'red'}) => {
   const [correct, setCorrect] = useState<boolean>(false);
   const [letter, setLetter] = useState<string>('');
   const [background, setBackground] = useState<string>('white');
@@ -126,7 +127,6 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
   useEffect(() => {
     if (prediction && letter === prediction) {
       setCorrect(true);
-      setBackground('lightgreen');
       generateRandomLetter(); 
     } else {
       setBackground('white');
@@ -174,7 +174,7 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
           />
           ) : (
             <Image
-              src={`/src/assets/amongus/red/Walk000${imageIndex}.png`}
+              src={`/src/assets/amongus/${color}/Walk000${imageIndex}.png`}
               alt={`Letter ${letter}`}
               height="auto"
               width="auto"
