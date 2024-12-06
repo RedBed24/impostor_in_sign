@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Image, Stack } from '@mantine/core';
 import { useSpring, animated } from '@react-spring/web';
+import GameState from '../store/game-state';
 
 interface AmongusLetterProps {
   prediction: string | null;
@@ -11,6 +12,7 @@ interface AmongusLetterProps {
 
 const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaused, color = 'red'}) => {
   const [correct, setCorrect] = useState<boolean>(false);
+  const [incorrect, setIncorrect] = useState<boolean>(false);
   const [letter, setLetter] = useState<string>('');
   const [background, setBackground] = useState<string>('white');
   const [imageIndex, setImageIndex] = useState<number>(0);
@@ -20,6 +22,9 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
   const [movingVertically, setMovingVertically] = useState<boolean>(false); // Control del movimiento vertical
   const containerRef = useRef<HTMLDivElement>(null); // Referencia al contenedor
 
+  const [appliedChange, setAppliedChange] = useState<boolean>(false);
+
+  const { loseLife, addScore } = GameState();
 
   const calculateInitialVerticalPosition = () => {
     if (containerRef.current) {
@@ -53,6 +58,7 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
       generateRandomLetter();
       setMovingVertically(false);
       setVerticalPosition(calculateInitialVerticalPosition());
+      setAppliedChange(false);
     };
 
     const animate = () => {
@@ -77,8 +83,8 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
             const parabola = -height * Math.pow((newPosition - peakX) / widthFactor, 2) + height + 20;
             setVerticalPosition(parabola);
           } else {
-            console.log(verticalPosition);
             setBackground('red');
+            setIncorrect(true);
             const straight = verticalPosition + speed;
             setVerticalPosition(straight);
           }
@@ -100,7 +106,7 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
     animationFrame = requestAnimationFrame(animate);
 
     return () => cancelAnimationFrame(animationFrame); // Limpiar el frame al desmontar el componente
-  }, [speed, movingVertically, correct, verticalPosition, isPaused]);
+  }, [speed, movingVertically, correct, verticalPosition, isPaused, incorrect, loseLife]);
 
   // Usar React Spring para animar el movimiento
   const { left } = useSpring({
@@ -126,12 +132,14 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
   // Cambiar el fondo cuando se adivina la letra
   useEffect(() => {
     if (prediction && letter === prediction) {
-      setCorrect(true);
+      if (!appliedChange) { setCorrect(true); addScore(1); setAppliedChange(true); }
       generateRandomLetter(); 
     } else {
+      if (!appliedChange && incorrect) { loseLife(); setAppliedChange(true); }
+      
       setBackground('white');
     }
-  }, [prediction, letter]);
+  }, [prediction, letter, addScore, appliedChange, loseLife, incorrect]);
 
   return (
     <>

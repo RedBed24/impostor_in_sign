@@ -3,8 +3,13 @@ import { Link, Route, Switch } from 'wouter';
 import { Play, CircleHelp } from 'lucide-react';
 import { useState } from 'react';
 
+import GameState from '../../store/game-state';
+
+
 export const GameHome: React.FC = () => {
   const [isImageLoaded, setImageLoaded] = useState(false);
+
+  const { resetGame } = GameState();
 
   return (
     <><Container p={0}>
@@ -57,7 +62,7 @@ export const GameHome: React.FC = () => {
             />
           </Group>
           <Link href='/gameplay'>
-            <Button size='lg' rightSection={<Play />}>JUGAR</Button>
+            <Button size='lg' rightSection={<Play />} onClick={resetGame}>JUGAR</Button>
           </Link>
           <Button size='lg' rightSection={<CircleHelp />}>AYUDA</Button>
         </Stack>

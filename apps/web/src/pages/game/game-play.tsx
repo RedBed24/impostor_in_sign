@@ -4,6 +4,7 @@ import { Pause, Play, LogOut } from 'lucide-react';
 import Webcam from "react-webcam";
 import { useRef, useState, useEffect } from "react";
 import AmongusLetter from '../../components/amongus_letter';
+import GameState from '../../store/game-state';
 
 const videoConstraints = {
     width: 200,
@@ -17,8 +18,7 @@ export const GamePlay: React.FC = () => {
     const [prediction, setPrediction] = useState<string | null>(null);
     const [isCameraReady, setCameraReady] = useState(false);
     const [isPaused, setIsPaused] = useState(true);
-    const [life, setLife] = useState(3);
-    const [score, setScore] = useState(0);
+    const { lives, score, level } = GameState();
 
 
     //test
@@ -115,9 +115,9 @@ export const GamePlay: React.FC = () => {
                         <Box p={10} style={{ display: 'flex', flexDirection: 'row', justifyContent:'flex-start',
                             border: "3px solid #FFFFFF",
                             borderRadius: "15px", align:'flex-start', marginLeft: 30, marginRight:150}}>
-                                <Image width={50} height={50} src={life > 0 ? "/src/assets/vida.png": "/src/assets/muerte.png"}/>
-                                <Image width={50} height={50} src={life >=2 ? "/src/assets/vida.png": "/src/assets/muerte.png"}/>
-                                <Image width={50} height={50} src={life== 3 ? "/src/assets/vida.png": "/src/assets/muerte.png"}/>
+                                <Image width={50} height={50} src={lives >=2 ? "/src/assets/vida.png": "/src/assets/muerte.png"}/>
+                                <Image width={50} height={50} src={lives >=4 ? "/src/assets/vida.png": "/src/assets/muerte.png"}/>
+                                <Image width={50} height={50} src={lives == 6 ? "/src/assets/vida.png": "/src/assets/muerte.png"}/>
                             </Box>
                             <Box ml={60}
                                 style={{
