@@ -5,6 +5,7 @@ import Webcam from "react-webcam";
 import { useRef, useState, useEffect } from "react";
 import AmongusLetter from '../../components/amongus_letter';
 import GameState from '../../store/game-state';
+import {Results} from './results';
 
 const videoConstraints = {
     width: 200,
@@ -92,6 +93,9 @@ export const GamePlay: React.FC = () => {
         return new Blob([ab], { type: mimeString });
     }
 
+    if (lives < 2) {
+        return <Results />;
+      }
 
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////

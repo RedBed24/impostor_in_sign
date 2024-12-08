@@ -24,7 +24,7 @@ const GameState = create<GameState>((set) => ({
   nextLevel: () => set((state) => ({ level: state.level + 1 })),
   resetGame: () =>
     set({
-      lives: 3,
+      lives: 6,
       score: 0,
       level: 1,
     }),
