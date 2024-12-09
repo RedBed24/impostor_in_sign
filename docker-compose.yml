@@ -39,6 +39,8 @@ services:
       MONGO_INITDB_ROOT_USERNAME: "${MONGO_INITDB_ROOT_USERNAME}"
       MONGO_INITDB_ROOT_PASSWORD: "${MONGO_INITDB_ROOT_PASSWORD}"
       MONGO_DB_URL: "mongodb://impostor-database:27017"
+      SECRET_KEY: "${SECRET_KEY}"
+      ALGORITHM: "${ALGORITHM}"
     ports:
       - "8000:8000"
     restart: on-failure
