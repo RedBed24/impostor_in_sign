@@ -1,12 +1,14 @@
-from fastapi import FastAPI, File, UploadFile
+import time
 import pickle
 import pandas as pd
+from fastapi import FastAPI, File, UploadFile
 from contextlib import asynccontextmanager
 from hand_detector import HandPointsDetector
+from db_connector import MongoDBConnector
 import mlflow
 from mlflow.models import infer_signature
 from mlflow.exceptions import MlflowException
-import time
+from hashlib import md5
 
 
 MLFLOW_EXPERIMENT_NAME = "Sign Language Classificator"
@@ -73,6 +75,11 @@ async def predict(file: UploadFile = File(...), label:str = ""):
     if MLFLOW_AVAILABLE:
         log_mlflow(run_id=run_id, df = df, model = model, pred_time=end - init, prediction = prediction)
 
+    # send to db
+    if prediction[0] == label:
+        db = MongoDBConnector().get_db()
+        real_images = db["real_images"] 
+        real_images.insert_one({"_id": md5(img_bytes).hexdigest(), "image.bytes": img_bytes, "label": label})
     return {"prediction": prediction[0]}
     
 

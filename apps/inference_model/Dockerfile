@@ -8,6 +8,10 @@ COPY inference_model /apps/inference_model
 COPY hand_detector /apps/hand_detector
 RUN pip install /apps/hand_detector
 
+# Copy the db_connector package to the container
+COPY db_connector /apps/db_connector
+RUN pip install /apps/db_connector
+
 # Install curl
 RUN apt-get update && apt-get install -y curl
 
