@@ -5,14 +5,22 @@ from contextlib import asynccontextmanager
 from hand_detector import HandPointsDetector
 import mlflow
 from mlflow.models import infer_signature
+from mlflow.exceptions import MlflowException
 import time
 
 
 MLFLOW_EXPERIMENT_NAME = "Sign Language Classificator"
 DETECTOR = HandPointsDetector(min_detection_confidence=0.3, static_image_mode=True)
 ## mlflow connection
-mlflow.set_tracking_uri(uri="http://impostor-mlflow:8888")
-mlflow.set_experiment(MLFLOW_EXPERIMENT_NAME)
+MLFLOW_AVAILABLE = True
+try:
+    mlflow.set_tracking_uri(uri="http://impostor-mlflow:8888")
+    mlflow.set_experiment(MLFLOW_EXPERIMENT_NAME)
+    print(f"Connected to MLFlow, experiment: {MLFLOW_EXPERIMENT_NAME}")
+except Exception as e:
+    MLFLOW_AVAILABLE = False
+    print(f"Error, no connection to MLFlow on port 8888. Error: {e}")
+
 
 # executed only when the server is initialized
 @asynccontextmanager
@@ -46,37 +54,54 @@ def detect_points(img_bytes: bytes) -> pd.DataFrame:
 @app.post("/predict")
 async def predict(file: UploadFile = File(...), label:str = ""):
     img_bytes = await file.read()
-    with mlflow.start_run():
-        df = detect_points(img_bytes)
-        
+    
+    if MLFLOW_AVAILABLE:
+        run = mlflow.start_run()
+        run_id = run.info.run_id
 
-        mlflow.log_param("dataframe size", df.size)
-        mlflow.log_params(model.get_params())
-        mlflow.set_tag("Objective", "Sign Language Classification")
-        signature = infer_signature(df, model.predict(df))
-        mlflow.sklearn.log_model(
-            sk_model=model,
-            artifact_path="model",
-            signature=signature,
-            input_example=df,
-            registered_model_name="SignLanguageModel",
-        )
-        with open("inputs.txt", "w") as f:
-            f.write(str(df))
-        mlflow.log_artifact("inputs.txt")
-        if df.empty:
-            return {"message": "Hand not detected properly"}
+    df = detect_points(img_bytes)
         
-        ##############
-        init = time.time()
-        prediction = model.predict(df)
-        end = time.time()
-        ###############
-        mlflow.log_metric("prediction time", end - init)
+    if df.empty:
+        if MLFLOW_AVAILABLE:
+            log_mlflow(run_id=run_id, df = df, model = model, pred_time=0, prediction = "")
+        return {"message": "Hand not detected properly"}
 
-        
-        with open("outputs.txt", "w") as f:
-            f.write(str(prediction[0]))
-        mlflow.log_artifact("outputs.txt")
+    init = time.time()
+    prediction = model.predict(df)
+    end = time.time()
 
-        return {"prediction": prediction[0]}
+    if MLFLOW_AVAILABLE:
+        log_mlflow(run_id=run_id, df = df, model = model, pred_time=end - init, prediction = prediction)
+
+    return {"prediction": prediction[0]}
+    
+
+def log_mlflow(run_id, df: pd.DataFrame, model, pred_time:float, prediction) -> None:
+    """ Log the model and the input data to MLFlow """
+
+    mlflow.log_param("dataframe size", df.size)
+    mlflow.log_params(model.get_params())
+    mlflow.set_tag("Objective", "Sign Language Classification")
+    signature = infer_signature(df, model.predict(df))
+    mlflow.sklearn.log_model(
+        sk_model=model,
+        artifact_path="model",
+        signature=signature,
+        input_example=df,
+        registered_model_name="SignLanguageModel",
+    )
+    with open("inputs.txt", "w") as f:
+        f.write(str(df))
+    mlflow.log_artifact("inputs.txt")
+    
+    mlflow.log_metric("prediction time", pred_time)
+
+    
+    with open("outputs.txt", "w") as f:
+        f.write(str(prediction[0]))
+    mlflow.log_artifact("outputs.txt")
+    if run_id is not None:
+        try:
+            mlflow.end_run()
+        except MlflowException as e:
+            print(f"Error al finalizar el run de MLflow: {e}")
