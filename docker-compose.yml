@@ -86,7 +86,18 @@ services:
       retries: 3
       start_period: 5s
 
+  mlflow:
+    container_name: impostor-mlflow
+    ports:
+      - "8888:8888"
+    build:
+      context: apps
+      dockerfile: mlflow/Dockerfile
+    volumes:
+      - mlflow:/mlflow
+
 volumes:
   mongo-data:
   mongo-log:
   apps:
+  mlflow:
