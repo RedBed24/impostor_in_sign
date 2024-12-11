@@ -23,7 +23,7 @@ export const PhotoCard: React.FC<PhotoCardProps> = ({ imageID }) => {
 
   const onRemoveImage = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const response = await fetch(`/api/img/${imageID}`, {
         method: 'DELETE',
         headers: {

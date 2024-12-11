@@ -1,29 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Container, SimpleGrid, Title } from '@mantine/core';
+import { Button, Container, Modal, SimpleGrid, Title } from '@mantine/core';
 import { PhotoCard } from './photo-card';
+import { LoginForm } from './login-form';
 
 export const ImageGrid: React.FC = () => {
   const [images, setImages] = useState<string[]>([]);
-
-  const handleGetToken = async () => {
-    try {
-      const formData = new URLSearchParams();
-      formData.append('username', '');
-      formData.append('password', '');
-
-      const response = await fetch('/token', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      });
-      const data = await response.json();
-      localStorage.setItem('token', data.access_token);
-    } catch (error) {
-      console.error('Error getting token:', error);
-    }
-  }
+  const [modalOpened, setModalOpened] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -40,6 +22,13 @@ export const ImageGrid: React.FC = () => {
   }, []);
 
   const handleUploadImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const token = sessionStorage.getItem('token');
+
+    if (!token) {
+      setModalOpened(true);
+      return;
+    }
+
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -48,7 +37,6 @@ export const ImageGrid: React.FC = () => {
     formData.append('label', "test");
 
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch('/api/img/', {
         method: 'PUT',
         body: formData,
@@ -69,7 +57,7 @@ export const ImageGrid: React.FC = () => {
     <>
       <Container>
         <Title>Dashboard</Title>
-        <Button onClick={handleGetToken} >Get Token</Button>
+        <Button onClick={() => setModalOpened(true)} >Login</Button>
         <input
           type="file"
           onChange={handleUploadImage}
@@ -83,6 +71,9 @@ export const ImageGrid: React.FC = () => {
           ))}
         </SimpleGrid>
       </Container>
+      <Modal opened={modalOpened} onClose={() => setModalOpened(false)} size="lg">
+        <LoginForm setModalOpened={setModalOpened}/>
+      </Modal>
     </>
   );
 };
