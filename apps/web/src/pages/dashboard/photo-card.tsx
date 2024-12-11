@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { ActionIcon, Card, Flex, Group, Image, Modal, Text } from '@mantine/core';
-import { Trash2 } from 'lucide-react';
+import { ActionIcon, Card, Flex, Image, Modal, Text, TextInput } from '@mantine/core';
+import { Check, Pencil, Trash2 } from 'lucide-react';
 
 interface PhotoCardProps {
   imageID: string;
+  getToken: () => void;
 }
 
-export const PhotoCard: React.FC<PhotoCardProps> = ({ imageID }) => {
+export const PhotoCard: React.FC<PhotoCardProps> = ({ imageID, getToken }) => {
   const [label, setLabel] = useState<string>('');
   const [modalOpened, setModalOpened] = useState<boolean>(false);
-  const [selectedImageUrl, setSelectedImageUrl] = useState<string>('');
+  const [isEditable, setIsEditable] = useState<boolean>(false);
 
   const fetchLabel = async () => {
     try {
@@ -22,8 +23,14 @@ export const PhotoCard: React.FC<PhotoCardProps> = ({ imageID }) => {
   };
 
   const onRemoveImage = async () => {
+    const token = sessionStorage.getItem('token');
+
+    if (!token) {
+      getToken();
+      return;
+    }
+
     try {
-      const token = sessionStorage.getItem('token');
       const response = await fetch(`/api/img/${imageID}`, {
         method: 'DELETE',
         headers: {
@@ -41,10 +48,34 @@ export const PhotoCard: React.FC<PhotoCardProps> = ({ imageID }) => {
     }
   }
 
-  const onImageClick = (url: string) => {
-    setSelectedImageUrl(url);
-    setModalOpened(true);
-  }
+  const onEditLabel = async () => {
+    const token = sessionStorage.getItem('token');
+
+    if (!token) {
+      getToken();
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/img/${imageID}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ label }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setIsEditable(false);
+      } else {
+        console.error('Failed to update label:', data);
+      }
+    }
+    catch (error) {
+      console.error('Error updating label:', error);
+    }
+  };
 
   useEffect(() => {
     fetchLabel();
@@ -56,13 +87,28 @@ export const PhotoCard: React.FC<PhotoCardProps> = ({ imageID }) => {
     <>
       <Card shadow="sm" padding="lg">
         <Card.Section>
-          <Image width={200} height={200} onClick={() => { onImageClick(imageUrl) }} src={imageUrl} />
+          <Image width={200} height={200} onClick={() => { setModalOpened(true) }} src={imageUrl} />
         </Card.Section>
         <Card.Section>
           <Flex justify="space-between" align="center">
-            <Text size="lg" mt="md">
-              Label: {label}
-            </Text>
+            <Flex gap="xs" align="center">
+              <Text>Label:</Text>
+              {isEditable ? (
+              <>
+              <TextInput value={label} onChange={(e) => setLabel(e.currentTarget.value)} />
+              <ActionIcon size="sm" variant="transparent" color="green" onClick={() => {setIsEditable(!isEditable); onEditLabel();}}>
+                <Check size={20} />
+              </ActionIcon>
+              </>
+              ) : (
+              <>
+              <Text onClick={() => setIsEditable(!isEditable)}>{label}</Text>
+              <ActionIcon size="sm" variant="transparent" color="green" onClick={() => setIsEditable(!isEditable)}>
+                <Pencil size={20} />
+              </ActionIcon>
+              </>
+              )}
+            </Flex>
             <ActionIcon size="sm" variant="transparent" color="red" onClick={onRemoveImage}>
               <Trash2 size={20} />
             </ActionIcon>
@@ -70,7 +116,7 @@ export const PhotoCard: React.FC<PhotoCardProps> = ({ imageID }) => {
         </Card.Section>
       </Card>
       <Modal opened={modalOpened} onClose={() => setModalOpened(false)} size="lg">
-        <Image src={selectedImageUrl} />
+        <Image src={imageUrl} />
       </Modal>
     </>
   );

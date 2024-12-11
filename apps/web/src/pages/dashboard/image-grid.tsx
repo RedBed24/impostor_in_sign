@@ -67,7 +67,7 @@ export const ImageGrid: React.FC = () => {
         <Button onClick={() => document.getElementById('upload-input')?.click()} >Upload Image</Button>
         <SimpleGrid cols={3} spacing="lg">
           {images.map((image, index) => (
-            <PhotoCard key={index} imageID={image.id} />
+            <PhotoCard key={index} imageID={image.id} getToken={() => setModalOpened(true)} />
           ))}
         </SimpleGrid>
       </Container>
