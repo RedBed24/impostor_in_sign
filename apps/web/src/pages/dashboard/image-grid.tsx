@@ -53,6 +53,7 @@ export const ImageGrid: React.FC = () => {
       if (!response.ok) {
         throw new Error('Failed to upload image');
       }
+      window.location.reload();
     } catch (error) {
       console.error('Error uploading image:', error);
     }
