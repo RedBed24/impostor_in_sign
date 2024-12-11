@@ -3,8 +3,13 @@ import { Button, Container, Modal, SimpleGrid, Title } from '@mantine/core';
 import { PhotoCard } from './photo-card';
 import { LoginForm } from './login-form';
 
+interface Image {
+  id: string;
+  label: string;
+}
+
 export const ImageGrid: React.FC = () => {
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<Image[]>([]);
   const [modalOpened, setModalOpened] = useState<boolean>(false);
 
   useEffect(() => {
