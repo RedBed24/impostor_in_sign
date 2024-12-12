@@ -1,11 +1,14 @@
 import { Container, Group, BackgroundImage, Table, Image, Stack, Text, TextInput, Modal, Button } from '@mantine/core';
 import { SendHorizontal } from 'lucide-react';
 import { useState } from "react";
-
+import Confetti from 'react-confetti';
+import GameState from '../../store/game-state';
 
 export const Results: React.FC = () => {
   const [opened, setOpened] = useState(true);
   const [name, setName] = useState("");
+
+  const { score } = GameState();
 
   const handleClose = () => {
     if (name.trim() !== "") {
@@ -56,7 +59,7 @@ export const Results: React.FC = () => {
           </Modal>
 
 
-
+          {imageIndex <= 20 && !opened && (<Confetti width={window.innerWidth} height={window.innerHeight} recycle={false} />)}
           <Group style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
             h='100%'>
             <Stack align="center" justify="center" h='100%' ml={40}>
@@ -76,15 +79,15 @@ export const Results: React.FC = () => {
                 </Table.Thead>
                 <Table.Tbody>
                   <Table.Tr>
-                    <Table.Td>1</Table.Td>
+                    <Table.Td>0</Table.Td>
                     <Table.Td>Red Sus</Table.Td>
                     <Table.Td>90</Table.Td>
                   </Table.Tr>
                 </Table.Tbody>
                 <Table.Tr>
-                    <Table.Td>?</Table.Td>
+                    <Table.Td>{imageIndex}</Table.Td>
                     <Table.Td>{name}</Table.Td>
-                    <Table.Td>xxxxx</Table.Td>
+                    <Table.Td>{score}</Table.Td>
                   </Table.Tr>
                 {/* <Table.Tbody>{rows}</Table.Tbody> */}
               </Table>
