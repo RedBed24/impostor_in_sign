@@ -56,17 +56,14 @@ def detect_points(img_bytes: bytes) -> pd.DataFrame:
 @app.post("/predict")
 async def predict(file: UploadFile = File(...), label:str = ""):
     img_bytes = await file.read()
-    
-    if MLFLOW_AVAILABLE:
-        run = mlflow.start_run()
-        run_id = run.info.run_id
 
     df = detect_points(img_bytes)
-        
     if df.empty:
-        if MLFLOW_AVAILABLE:
-            log_mlflow(run_id=run_id, df = df, model = model, pred_time=0, prediction = "")
         return {"message": "Hand not detected properly"}
+
+    if MLFLOW_AVAILABLE:
+        run = mlflow.start_run(nested=True)
+        run_id = run.info.run_id
 
     init = time.time()
     prediction = model.predict(df)
@@ -76,10 +73,11 @@ async def predict(file: UploadFile = File(...), label:str = ""):
         log_mlflow(run_id=run_id, df = df, model = model, pred_time=end - init, prediction = prediction)
 
     # send to db
-    if prediction[0] == label:
+    if prediction[0] != label:
         db = MongoDBConnector().get_db()
         real_images = db["real_images"] 
-        real_images.insert_one({"_id": md5(img_bytes).hexdigest(), "image.bytes": img_bytes, "label": label})
+        real_images.insert_one({"_id": md5(img_bytes).hexdigest(), "image.bytes": img_bytes, 
+                                "label": "real_"+label, "prediction": prediction[0]})
     return {"prediction": prediction[0]}
     
 
