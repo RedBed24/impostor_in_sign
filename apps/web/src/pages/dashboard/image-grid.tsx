@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button, Container, Modal, SimpleGrid, Title } from '@mantine/core';
 import { PhotoCard } from './photo-card';
 import { LoginForm } from './login-form';
+import { ImageUpload } from './image-upload';
 
 interface Image {
   id: string;
@@ -10,12 +11,13 @@ interface Image {
 
 export const ImageGrid: React.FC = () => {
   const [images, setImages] = useState<Image[]>([]);
-  const [modalOpened, setModalOpened] = useState<boolean>(false);
+  const [loginModalOpened, setLoginModalOpened] = useState<boolean>(false);
+  const [uploadModalOpened, setUploadModalOpened] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchImages = async () => {
       try {
-        const response = await fetch('/api/img');
+        const response = await fetch('/api/img?limit=9');
         const data = await response.json();
         setImages(data.images);
       } catch (error) {
@@ -26,59 +28,31 @@ export const ImageGrid: React.FC = () => {
     fetchImages();
   }, []);
 
-  const handleUploadImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const token = sessionStorage.getItem('token');
-
-    if (!token) {
-      setModalOpened(true);
+  const handleUploadImage = () => {
+    if (!sessionStorage.getItem('token')) {
+      setLoginModalOpened(true);
       return;
     }
-
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append('file', file, file.name);
-    formData.append('label', "test");
-
-    try {
-      const response = await fetch('/api/img/', {
-        method: 'PUT',
-        body: formData,
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to upload image');
-      }
-      window.location.reload();
-    } catch (error) {
-      console.error('Error uploading image:', error);
-    }
+    setUploadModalOpened(true);
   };
 
   return (
     <>
       <Container>
         <Title>Dashboard</Title>
-        <Button onClick={() => setModalOpened(true)} >Login</Button>
-        <input
-          type="file"
-          onChange={handleUploadImage}
-          style={{ display: 'none' }}
-          id="upload-input"
-        />
-        <Button onClick={() => document.getElementById('upload-input')?.click()} >Upload Image</Button>
+        <Button onClick={() => setLoginModalOpened(true)} >Login</Button>
+        <Button onClick={() => handleUploadImage()} >Upload Image</Button>
         <SimpleGrid cols={3} spacing="lg">
           {images.map((image, index) => (
-            <PhotoCard key={index} imageID={image.id} getToken={() => setModalOpened(true)} />
+            <PhotoCard key={index} imageID={image.id} getToken={() => setLoginModalOpened(true)} />
           ))}
         </SimpleGrid>
       </Container>
-      <Modal opened={modalOpened} onClose={() => setModalOpened(false)} size="lg">
-        <LoginForm setModalOpened={setModalOpened}/>
+      <Modal opened={loginModalOpened} onClose={() => setLoginModalOpened(false)} size="lg">
+        <LoginForm setModalOpened={setLoginModalOpened}/>
+      </Modal>
+      <Modal opened={uploadModalOpened} onClose={() => setUploadModalOpened(false)} size="lg">
+        <ImageUpload />
       </Modal>
     </>
   );
