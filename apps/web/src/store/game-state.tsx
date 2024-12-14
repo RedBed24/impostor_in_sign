@@ -14,22 +14,33 @@ interface GameState {
 
 // Crear la tienda con Zustand
 const GameState = create<GameState>((set) => ({
-  lives: 6,
+  lives: 3,
   score: 0,
   level: 1,
-  isPaused: false,
 
-  loseLife: () => set((state) => ({ lives: Math.max(state.lives - 1, 0) })),
-  addScore: (points) => set((state) => ({ score: state.score + points })),
-  nextLevel: () => set((state) => ({ level: state.level + 1 })),
-  resetGame: () =>
-    set({
-      lives: 6,
+  loseLife: () => set((state) => {
+    const newLives = Math.max(state.lives - 1, 0);
+    console.log('loseLife:', newLives);
+    return { lives: newLives };
+  }),
+  addScore: (points) => set((state) => {
+    const newScore = state.score + points;
+    console.log('addScore:', newScore);
+    return { score: newScore };
+  }),
+  nextLevel: () => set((state) => {
+    const newLevel = state.level + 1;
+    console.log('nextLevel:', newLevel);
+    return { level: newLevel };
+  }),
+  resetGame: () => set(() => {
+    console.log('resetGame');
+    return {
+      lives: 3,
       score: 0,
       level: 1,
-    }),
-
-
+    };
+  }),
 }));
 
 export default GameState;
