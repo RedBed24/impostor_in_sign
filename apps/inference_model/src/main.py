@@ -1,7 +1,7 @@
 import time
 import pickle
 import pandas as pd
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, BackgroundTasks, background
 from contextlib import asynccontextmanager
 from hand_detector import HandPointsDetector
 from db_connector import MongoDBConnector
@@ -9,8 +9,10 @@ import mlflow
 from mlflow.models import infer_signature
 from mlflow.exceptions import MlflowException
 from hashlib import md5
+import logging
 
 
+logging.basicConfig(level=logging.INFO)
 MLFLOW_EXPERIMENT_NAME = "Sign Language Classificator"
 DETECTOR = HandPointsDetector(min_detection_confidence=0.3, static_image_mode=True)
 ## mlflow connection
@@ -18,10 +20,10 @@ MLFLOW_AVAILABLE = True
 try:
     mlflow.set_tracking_uri(uri="http://impostor-mlflow:8888")
     mlflow.set_experiment(MLFLOW_EXPERIMENT_NAME)
-    print(f"Connected to MLFlow, experiment: {MLFLOW_EXPERIMENT_NAME}")
+    logging.info(f"=========Connected to MLFlow, experiment: {MLFLOW_EXPERIMENT_NAME}")
 except Exception as e:
     MLFLOW_AVAILABLE = False
-    print(f"Error, no connection to MLFlow on port 8888. Error: {e}")
+    logging.error(f"=========Error, no connection to MLFlow on port 8888. Error: {e}")
 
 
 # executed only when the server is initialized
@@ -54,7 +56,7 @@ def detect_points(img_bytes: bytes) -> pd.DataFrame:
     return df
 
 @app.post("/predict")
-async def predict(file: UploadFile = File(...), label:str = ""):
+async def predict(background_tasks: BackgroundTasks, file: UploadFile = File(...), label:str = ""):
     img_bytes = await file.read()
 
     df = detect_points(img_bytes)
@@ -64,22 +66,27 @@ async def predict(file: UploadFile = File(...), label:str = ""):
     if MLFLOW_AVAILABLE:
         run = mlflow.start_run(nested=True)
         run_id = run.info.run_id
+        logging.info(f"=========Run ID: {run_id}")
 
     init = time.time()
     prediction = model.predict(df)
     end = time.time()
 
     if MLFLOW_AVAILABLE:
-        log_mlflow(run_id=run_id, df = df, model = model, pred_time=end - init, prediction = prediction)
+        background_tasks.add_task(log_mlflow, run_id=run_id, df = df, model = model, pred_time=end - init, prediction = prediction)
 
-    # send to db
-    if prediction[0] != label:
-        db = MongoDBConnector().get_db()
-        real_images = db["real_images"] 
-        real_images.insert_one({"_id": md5(img_bytes).hexdigest(), "image.bytes": img_bytes, 
-                                "label": "real_"+label, "prediction": prediction[0]})
+    background_tasks.add_task(send_to_db, df, prediction, label, img_bytes)
+    
     return {"prediction": prediction[0]}
     
+def send_to_db(df: pd.DataFrame, prediction: str, label: str, img_bytes: bytes) -> None:
+    """ Send the image to the database """
+    if prediction[0] != label:
+        db = MongoDBConnector().get_db()
+        real_images = db["raw_images"] 
+        real_images.insert_one({"_id": md5(img_bytes).hexdigest(), "image.bytes": img_bytes, 
+                                "label": f"real_{label}", "prediction": prediction[0]})
+        logging.info(f"=========Image inserted in the database")    
 
 def log_mlflow(run_id, df: pd.DataFrame, model, pred_time:float, prediction) -> None:
     """ Log the model and the input data to MLFlow """
@@ -95,18 +102,15 @@ def log_mlflow(run_id, df: pd.DataFrame, model, pred_time:float, prediction) -> 
         input_example=df,
         registered_model_name="SignLanguageModel",
     )
-    with open("inputs.txt", "w") as f:
-        f.write(str(df))
-    mlflow.log_artifact("inputs.txt")
-    
-    mlflow.log_metric("prediction time", pred_time)
+    d = {str(k): v for k, v in df.to_dict().items()}
+    mlflow.log_dict(d, "input_data.json")
+    mlflow.log_dict({"prediction": prediction[0]}, "output_data.json")
 
+    mlflow.log_metric("prediction time", pred_time)
     
-    with open("outputs.txt", "w") as f:
-        f.write(str(prediction[0]))
-    mlflow.log_artifact("outputs.txt")
     if run_id is not None:
         try:
             mlflow.end_run()
+            logging.info(f"=========Run {run_id} finalizado")
         except MlflowException as e:
-            print(f"Error al finalizar el run de MLflow: {e}")
+            logging.error(f"Error al finalizar el run de MLflow: {e}")
