@@ -1,24 +1,19 @@
-import { Link, Route, Switch } from 'wouter';
-import { Button, Container } from '@mantine/core';
+import { Route, Switch } from 'wouter';
+import { Container } from '@mantine/core';
 import { GameHome } from './pages/game/game-home';
+import { Home } from './pages/home';
 
 export const App: React.FC = () => {
 
   return (
     <>
-      <Container>
-        <Link href='/game'>
-          <Button>Go to Game</Button>
-        </Link>
-        <Link href='/dashboard'>
-          <Button>Dashboard</Button>
-        </Link>
-
+    <Container size="xl" py="xl" bg='gray.2' m={0} fluid>
         <Switch>
-          <Route path="/game" component={GameHome} />
+          <Route path="/" component={Home} />
+          <Route path="/game" component={GameHome}/>
           <Route path="/dasboard" />
         </Switch>
-      </Container>
+    </Container>
     </>
   );
 };
