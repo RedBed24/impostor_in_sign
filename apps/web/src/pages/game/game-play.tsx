@@ -139,7 +139,11 @@ export const GamePlay: React.FC = () => {
                                     onUserMedia={handleUserMedia}
                                 />
                             </Box>
+                            <Stack>
                             <Text fz={30} c='white'>PREDICTION: {prediction}</Text>
+                                <Image width={50} height={50} src={`/src/assets/letters/${currentLetter}.jpg`} fit='contain'/>
+                            </Stack>
+
                         </Group>
                     </Grid.Col>
                     <Grid.Col span={4} style={{ display: 'flex', justifyContent: 'flex-end' }}>
