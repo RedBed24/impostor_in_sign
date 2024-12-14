@@ -1,12 +1,14 @@
 import { Container, Group, BackgroundImage, Table, Image, Stack, Text, TextInput, Modal, Button } from '@mantine/core';
 import { SendHorizontal } from 'lucide-react';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Confetti from 'react-confetti';
 import GameState from '../../store/game-state';
+import { Avatar_Raking } from '../../components/avatar_ranking';
 
 export const Results: React.FC = () => {
   const [opened, setOpened] = useState(true);
   const [name, setName] = useState("");
+  const [position, setPosition] = useState(-1);
 
   const { score } = GameState();
 
@@ -16,12 +18,11 @@ export const Results: React.FC = () => {
     }
   };
   const generateRandomNumber = () => {
-    // Genera un número aleatorio entre 1 y 16
-    return Math.floor(Math.random() * 16) + 1;
+    return Math.floor(Math.random() * 100) + 1;
   };
-
-  const [imageIndex, setImageIndex] = useState(generateRandomNumber());
-
+  useEffect(() => {
+    setPosition(generateRandomNumber());
+  }, []);
 
   return (
     <>
@@ -58,13 +59,10 @@ export const Results: React.FC = () => {
           </Modal>
 
 
-          {imageIndex <= 20 && !opened && (<Confetti width={window.innerWidth} height={window.innerHeight} recycle={false} />)}
+          {position <= 20 && !opened && (<Confetti width={window.innerWidth} height={window.innerHeight} recycle={false} />)}
           <Group style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
             h='100%'>
-            <Stack align="center" justify="center" h='100%' ml={40}>
-              <Text fz={70} fw={500} c='white' >#{imageIndex}</Text>
-              <Image src={`/src/assets/amongus/stickers/${imageIndex}.png`} h='40%' />
-            </Stack>
+            <Avatar_Raking position={position} />
             <Stack w='50%' m={50} >
               <Text fz={70} fw={500} variant="gradient"
                 gradient={{ from: 'blue', to: 'red', deg: 75 }}>RANKING</Text>
@@ -83,7 +81,7 @@ export const Results: React.FC = () => {
                     <Table.Td>90</Table.Td>
                   </Table.Tr>
                 <Table.Tr>
-                    <Table.Td>{imageIndex}</Table.Td>
+                    <Table.Td>{position}</Table.Td>
                     <Table.Td>{name}</Table.Td>
                     <Table.Td>{score}</Table.Td>
                   </Table.Tr>
