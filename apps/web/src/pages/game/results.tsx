@@ -28,7 +28,6 @@ export const Results: React.FC = () => {
       <Container p={0}>
         <BackgroundImage
           src="/src/assets/dotted_background.jpg"
-          onLoad={() => setImageLoaded(true)}
           style={{
             width: '100vw',
             height: '100vh',
@@ -83,12 +82,12 @@ export const Results: React.FC = () => {
                     <Table.Td>Red Sus</Table.Td>
                     <Table.Td>90</Table.Td>
                   </Table.Tr>
-                </Table.Tbody>
                 <Table.Tr>
                     <Table.Td>{imageIndex}</Table.Td>
                     <Table.Td>{name}</Table.Td>
                     <Table.Td>{score}</Table.Td>
                   </Table.Tr>
+                </Table.Tbody>
                 {/* <Table.Tbody>{rows}</Table.Tbody> */}
               </Table>
             </Stack>
