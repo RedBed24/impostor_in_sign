@@ -10,7 +10,7 @@ from mlflow.models import infer_signature
 from mlflow.exceptions import MlflowException
 from hashlib import md5
 import logging
-
+import os
 
 logging.basicConfig(level=logging.INFO)
 MLFLOW_EXPERIMENT_NAME = "Sign Language Classificator"
@@ -18,7 +18,11 @@ DETECTOR = HandPointsDetector(min_detection_confidence=0.3, static_image_mode=Tr
 ## mlflow connection
 MLFLOW_AVAILABLE = True
 try:
-    mlflow.set_tracking_uri(uri="http://impostor-mlflow:8888")
+    mlflow_tracking_uri = os.getenv("MLFLOW_TRACKING_URI")
+    if mlflow_tracking_uri:
+        mlflow.set_tracking_uri(uri=mlflow_tracking_uri)
+    else:
+        raise ValueError("MLFLOW_TRACKING_URI environment variable is not set")
     mlflow.set_experiment(MLFLOW_EXPERIMENT_NAME)
     logging.info(f"=========Connected to MLFlow, experiment: {MLFLOW_EXPERIMENT_NAME}")
 except Exception as e:
