@@ -1,26 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { ActionIcon, Card, Flex, Image, Modal, Text, TextInput } from '@mantine/core';
 import { Check, Pencil, Trash2 } from 'lucide-react';
 
 interface PhotoCardProps {
   imageID: string;
+  initlabel: string;
   getToken: () => void;
 }
 
-export const PhotoCard: React.FC<PhotoCardProps> = ({ imageID, getToken }) => {
-  const [label, setLabel] = useState<string>('');
+export const PhotoCard: React.FC<PhotoCardProps> = ({ imageID, initlabel, getToken }) => {
+  const [label, setLabel] = useState<string>(initlabel);
   const [modalOpened, setModalOpened] = useState<boolean>(false);
   const [isEditable, setIsEditable] = useState<boolean>(false);
-
-  const fetchLabel = async () => {
-    try {
-      const response = await fetch(`/api/img/${imageID}`);
-      const data = await response.json();
-      setLabel(data.label);
-    } catch (error) {
-      console.error('Error fetching label:', error);
-    }
-  };
 
   const onRemoveImage = async () => {
     const token = sessionStorage.getItem('token');
@@ -76,10 +67,6 @@ export const PhotoCard: React.FC<PhotoCardProps> = ({ imageID, getToken }) => {
       console.error('Error updating label:', error);
     }
   };
-
-  useEffect(() => {
-    fetchLabel();
-  }, []);
 
   const imageUrl: string = `/api/img/raw/${imageID}`;
 

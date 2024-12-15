@@ -16,7 +16,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({setModalOpened}) => {
       const formData = new URLSearchParams();
       formData.append('username', username);
       formData.append('password', password);
-      console.log(formData.toString());
 
       const response = await fetch('/token', {
         method: 'POST',
