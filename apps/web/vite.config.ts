@@ -6,8 +6,8 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/api/img': 'http://localhost:8000',
-      '/token': 'http://localhost:8000',
+      '/api/img': 'http://impostor-api:8000',
+      '/token': 'http://impostor-api:8000',
     }
   }
 })
