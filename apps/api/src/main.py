@@ -58,13 +58,13 @@ async def login_for_access_token(
     return Token(access_token=access_token, token_type="bearer")
 
 @app.get("/api/img")
-async def get_imgs(limit: int = 5) -> dict:
+async def get_imgs(limit: int = 5, skip: int = 0) -> dict:
     '''
     Get a list of images. The limit parameter can be used to limit the number of images returned.
     By default, the limit is set to 5.
     '''
     db = MongoDBConnector.get_db()
-    imgs = list(db.raw_images.find({}).limit(limit))
+    imgs = db.raw_images.find({}).skip(skip).limit(limit)
     imgs = list(map(lambda x: {"label": x["label"], "id": x["_id"]}, imgs))
     return {"images": imgs}
 
