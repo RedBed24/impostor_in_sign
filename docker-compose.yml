@@ -60,6 +60,9 @@ services:
       ALGORITHM: "${ALGORITHM}"
     ports:
       - "8000:8000"
+    depends_on:
+      database:
+        condition: service_healthy
     restart: on-failure
     healthcheck:
       test: curl --fail http://localhost:8000/iamalive || exit 1
