@@ -1,4 +1,21 @@
 services:
+  application_initializer:
+    container_name: impostor-application-initializer
+    depends_on:
+      database:
+        condition: service_healthy      
+    build:
+      context: apps
+      dockerfile: application_initializer/Dockerfile
+    env_file:
+      - .env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "${MONGO_INITDB_ROOT_USERNAME}"
+      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_INITDB_ROOT_PASSWORD}"
+      MONGO_DB_URL: "mongodb://impostor-database:27017"
+    volumes:
+      - apps:/shared-data
+
   database:
     container_name: impostor-database
     image: mongo:8.0.3
@@ -51,23 +68,6 @@ services:
       retries: 3
       start_period: 5s
 
-  application_initializer:
-    container_name: impostor-application-initializer
-    depends_on:
-      database:
-        condition: service_healthy      
-    build:
-      context: apps
-      dockerfile: application_initializer/Dockerfile
-    env_file:
-      - .env
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: "${MONGO_INITDB_ROOT_USERNAME}"
-      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_INITDB_ROOT_PASSWORD}"
-      MONGO_DB_URL: "mongodb://impostor-database:27017"
-    volumes:
-      - apps:/app/application_initializer
-
   inference_model:
     container_name: impostor-inference-model
     depends_on:
@@ -79,7 +79,7 @@ services:
     ports:
       - "8080:8000"
     volumes:
-      - apps:/app/inference_model
+      - apps:/shared-data
     restart: on-failure
     healthcheck:
       test: curl --fail http://localhost:8000/iamalive || exit 1

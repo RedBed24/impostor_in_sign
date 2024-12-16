@@ -12,7 +12,7 @@ DETECTOR = HandPointsDetector(min_detection_confidence=0.3, static_image_mode=Tr
 async def lifespan(app: FastAPI):
     """Load the model when the server starts and delete it when the server stops"""
     global model
-    model = pickle.load(open("/apps/application_initializer/pickles/random_forest_model.pkl", "rb"))
+    model = pickle.load(open("/shared-data/pickles/random_forest_model.pkl", "rb"))
     yield # pause method execution
     del model
 
@@ -36,9 +36,8 @@ def detect_points(img_bytes: bytes) -> pd.DataFrame:
     df = pd.concat([x_expanded, y_expanded], axis=1)
     return df
 
-@app.get("/predict")
+@app.post("/predict")
 async def predict(file: UploadFile = File(...)):
-    """¿que en predict le mandemos una imagen, la procese y nos devuelva la letra que es?"""
     img_bytes = await file.read()
     df = detect_points(img_bytes)
     if df.empty:
