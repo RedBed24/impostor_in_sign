@@ -1,11 +1,12 @@
-import { Container, Title, Text, Group, Box, BackgroundImage, Grid, Button, Skeleton, Modal, Stack, Image } from '@mantine/core';
+import { Text, Group, Box, BackgroundImage, Grid, Button, Modal, Stack, Image } from '@mantine/core';
 import { Pause, Play, LogOut } from 'lucide-react';
+import { Link } from 'wouter';
 
 import Webcam from "react-webcam";
 import { useRef, useState, useEffect } from "react";
 import AmongusLetter from '../../components/amongus_letter';
 import GameState from '../../store/game-state';
-import {Results} from './results';
+import { Results } from './results';
 
 const videoConstraints = {
     width: 200,
@@ -68,7 +69,6 @@ export const GamePlay: React.FC = () => {
                 }
 
                 try {
-                    console.log('Enviando al backend...');
                     // Enviar al backend
                     const response = await fetch('/predict', {
                         method: 'POST',
@@ -103,9 +103,9 @@ export const GamePlay: React.FC = () => {
         return new Blob([ab], { type: mimeString });
     }
 
-    if (lives < 2) {
+    if (lives < 1) {
         return <Results />;
-      }
+    }
 
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -126,12 +126,14 @@ export const GamePlay: React.FC = () => {
                 <Grid p={0}>
                     <Grid.Col span={8} mt={30}>
                         <Group style={{ width: '100%' }} display='flex' align='flex-start'>
-                        <Box p={10} style={{ display: 'flex', flexDirection: 'row', justifyContent:'flex-start',
-                            border: "3px solid #FFFFFF",
-                            borderRadius: "15px", align:'flex-start', marginLeft: 30, marginRight:150}}>
-                                <Image width={50} height={50} src={lives >=2 ? "/src/assets/vida.png": "/src/assets/muerte.png"}/>
-                                <Image width={50} height={50} src={lives >=4 ? "/src/assets/vida.png": "/src/assets/muerte.png"}/>
-                                <Image width={50} height={50} src={lives == 6 ? "/src/assets/vida.png": "/src/assets/muerte.png"}/>
+                            <Box p={10} style={{
+                                display: 'flex', flexDirection: 'row', justifyContent: 'flex-start',
+                                border: "3px solid #FFFFFF",
+                                borderRadius: "15px", align: 'flex-start', marginLeft: 30, marginRight: 150
+                            }}>
+                                <Image width={50} height={50} src={lives >= 1 ? "/src/assets/vida.png" : "/src/assets/muerte.png"} />
+                                <Image width={50} height={50} src={lives >= 2 ? "/src/assets/vida.png" : "/src/assets/muerte.png"} />
+                                <Image width={50} height={50} src={lives == 3 ? "/src/assets/vida.png" : "/src/assets/muerte.png"} />
                             </Box>
                             <Box ml={60}
                                 style={{
@@ -150,7 +152,7 @@ export const GamePlay: React.FC = () => {
                                 />
                             </Box>
                             <Stack>
-                            <Text fz={30} c='white'>PREDICTION: {prediction}</Text>
+                                <Text fz={30} c='white'>PREDICTION: {prediction}</Text>
                                 {mode === 'learn' && <Image width={50} height={50} src={`/src/assets/letters/${currentLetter}.jpg`} fit='contain'/>}
                             </Stack>
 
@@ -158,7 +160,7 @@ export const GamePlay: React.FC = () => {
                     </Grid.Col>
                     <Grid.Col span={4} style={{ display: 'flex', justifyContent: 'flex-end' }}>
                         <Text fz={30} c='white' mr={50}>SCORE: {score}</Text>
-                        <Button size="xl" onClick={() => setIsPaused(true)}><Pause/> </Button>
+                        <Button size="xl" onClick={() => setIsPaused(true)}><Pause /> </Button>
                     </Grid.Col>
                     <Grid.Col style={{ position: 'absolute', top: '57%' }}>
                         <AmongusLetter prediction={prediction} speed={5} isPaused={isPaused} color='red' 
@@ -169,17 +171,20 @@ export const GamePlay: React.FC = () => {
                 </Grid>
 
 
-            <Modal opened={isPaused} onClose={() => setIsPaused(false)} title="Menú de Pausa" centered 
-            overlayProps={{
-          backgroundOpacity: 0.55,
-          blur: 1,
-        }}>
-            <Stack>
-                <Button onClick={() => setIsPaused(false)} rightSection={<Play/>}>JUGAR</Button>
-                <Button color='red' rightSection={<LogOut/>}>SALIR</Button>
-            </Stack>
-                
-            </Modal>
+                <Modal opened={isPaused} onClose={() => setIsPaused(false)} title="Menú de Pausa" centered
+                    overlayProps={{
+                        backgroundOpacity: 0.55,
+                        blur: 1,
+                    }}>
+                    <Stack>
+                        <Button onClick={() => setIsPaused(false)} rightSection={<Play />}>JUGAR</Button>
+                        <Link href='/game'>
+                        <Button color='red' w='100%' rightSection={<LogOut />}>SALIR</Button>
+                        </Link>
+                        
+                    </Stack>
+
+                </Modal>
             </BackgroundImage>
         </>
     );
