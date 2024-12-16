@@ -22,9 +22,10 @@ export const Avatar_Raking: React.FC<Avatar_RakingProps> = ({ position }) => {
 
 
     return (
-            <Stack align="center" justify="center" h='100%' ml={50}>
-                <Text fz={70} fw={500} c='white' mb='lg' mt={0} mb={50}>#{position}</Text>
-                <Image src={`/src/assets/amongus/stickers/${imageIndex}.png`} h='40%' fit='content' mb='xl'/>
+            <Stack h='100%' ml={50}>
+                <Text  fz={50} fw={500} c='white' mt={0} mb='xl' ta='center'>#{position}</Text>
+                <Image src={`/src/assets/amongus/stickers/${imageIndex}.png`} h='40%' mb='xl'
+                fit='contain'/>
             <Group>
           {/* Renderizamos las insignias */}
           {insignias.map((insignia) => (
