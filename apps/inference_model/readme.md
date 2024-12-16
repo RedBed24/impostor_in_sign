@@ -33,6 +33,12 @@ Use the docker-compose file in the root of the project to run the model in produ
    pip install -e .
    ```
 
+   Inside the `apps/db_connector` directory:
+
+   ```bash
+   pip install -e .
+   ```
+
 3. Run the API:
 
    Inside the `apps/inference_model` directory:
