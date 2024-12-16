@@ -1,9 +1,10 @@
-import { Container, Group, BackgroundImage, Table, Image, Stack, Text, TextInput, Modal, Button } from '@mantine/core';
-import { SendHorizontal } from 'lucide-react';
+import { Container, Group, BackgroundImage, Table, Stack, Text, TextInput, Modal, Button } from '@mantine/core';
+import { House, SendHorizontal } from 'lucide-react';
 import { useEffect, useState } from "react";
 import Confetti from 'react-confetti';
 import GameState from '../../store/game-state';
 import { Avatar_Raking } from '../../components/avatar_ranking';
+import { Link } from 'wouter';
 
 export const Results: React.FC = () => {
   const [opened, setOpened] = useState(true);
@@ -63,7 +64,12 @@ export const Results: React.FC = () => {
           <Group style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
             h='100%'>
             <Avatar_Raking position={position} />
-            <Stack w='50%' m={50} >
+            <Stack w='50%' m={50} h='100%' >
+            <Group style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Link href='/game'>
+              <Button size='xl' rightSection={<House />}>HOME</Button>
+              </Link>
+            </Group>
               <Text fz={70} fw={500} variant="gradient"
                 gradient={{ from: 'blue', to: 'red', deg: 75 }}>RANKING</Text>
               <Table highlightOnHover withTableBorder bg='gray' opacity='0.8' >
