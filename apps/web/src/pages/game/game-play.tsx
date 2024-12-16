@@ -152,7 +152,10 @@ export const GamePlay: React.FC = () => {
                         <Button size="xl" onClick={() => setIsPaused(true)}><Pause/> </Button>
                     </Grid.Col>
                     <Grid.Col style={{ position: 'absolute', top: '57%' }}>
-                        <AmongusLetter prediction={prediction} speed={5} isPaused={isPaused} color='red'/>
+                        <AmongusLetter prediction={prediction} speed={5} isPaused={isPaused} color='red' 
+                        onLetterGenerated={handleLetterGenerated}/>
+                        {score >= 10 && score < 30 && <AmongusLetter prediction={prediction} speed={4} isPaused={isPaused} color='yellow' 
+                        onLetterGenerated={handleLetterGenerated}/>}
                     </Grid.Col>
                 </Grid>
 
