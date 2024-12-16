@@ -1,6 +1,6 @@
 import { Container, Title, Text, Group, Box, BackgroundImage, Grid, Button, Stack, Image, Skeleton } from '@mantine/core';
 import { Link, Route, Switch } from 'wouter';
-import { Play, CircleHelp } from 'lucide-react';
+import { Play, CircleHelp, House, GraduationCap, Brain } from 'lucide-react';
 import { useState } from 'react';
 
 import GameState from '../../store/game-state';
@@ -9,22 +9,22 @@ import GameState from '../../store/game-state';
 export const GameHome: React.FC = () => {
   const [isImageLoaded, setImageLoaded] = useState(false);
 
-  const { resetGame } = GameState();
+  const { resetGame, changeModeLearn, changeModeMem } = GameState();
 
   return (
     <><Container p={0}>
       {!isImageLoaded && (
         <Skeleton
-        visible={!isImageLoaded}
-        width="100vw"
-        height="100vh"
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          zIndex: 1,
-        }}
-      />
+          visible={!isImageLoaded}
+          width="100vw"
+          height="100vh"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            zIndex: 1,
+          }}
+        />
       )}
       <BackgroundImage
         src="/src/assets/pink-moon.jpg"
@@ -40,7 +40,7 @@ export const GameHome: React.FC = () => {
         }}>
 
         <Stack align="center" justify="center">
-          <Group justify='center' style={{ height: 'auto' }}>
+          <Group justify='center'>
             <Image
               src={`/src/assets/among-us-sus.gif`}
               alt={`gif`}
@@ -61,10 +61,18 @@ export const GameHome: React.FC = () => {
               m={0}
             />
           </Group>
-          <Link href='/gameplay'>
-            <Button size='lg' rightSection={<Play />} onClick={resetGame}>JUGAR</Button>
-          </Link>
-          <Button size='lg' rightSection={<CircleHelp />}>AYUDA</Button>
+          <Stack>
+            <Link href='/gameplay'>
+              <Button size='lg' leftSection={<GraduationCap/>} rightSection={<Play />} onClick={() => { resetGame(); changeModeLearn(); }} color='green' w='100%'>JUGAR Aprender</Button>
+            </Link>
+            <Link href='/gameplay'>
+              <Button size='lg' leftSection={<Brain/>} rightSection={<Play />} onClick={() => { resetGame(); changeModeMem(); }} color='green'>JUGAR Memorizar</Button>
+            </Link>
+            <Button size='lg' rightSection={<CircleHelp />} mt='xl'>AYUDA</Button>
+            <Link href='/'>
+              <Button w='100%' size='lg' rightSection={<House />}>HOME</Button>
+            </Link>
+          </Stack>
         </Stack>
       </BackgroundImage>
     </Container>

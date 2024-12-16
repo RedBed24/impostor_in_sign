@@ -19,7 +19,8 @@ export const GamePlay: React.FC = () => {
     const [prediction, setPrediction] = useState<string | null>(null);
     const [isCameraReady, setCameraReady] = useState(false);
     const [isPaused, setIsPaused] = useState(true);
-    const { lives, score, level } = GameState();
+    const { lives, score, level, mode } = GameState();
+    const [currentLetter, setCurrentLetter] = useState<string | null>(null);
 
 
     //test
@@ -141,7 +142,7 @@ export const GamePlay: React.FC = () => {
                             </Box>
                             <Stack>
                             <Text fz={30} c='white'>PREDICTION: {prediction}</Text>
-                                <Image width={50} height={50} src={`/src/assets/letters/${currentLetter}.jpg`} fit='contain'/>
+                                {mode === 'learn' && <Image width={50} height={50} src={`/src/assets/letters/${currentLetter}.jpg`} fit='contain'/>}
                             </Stack>
 
                         </Group>

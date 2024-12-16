@@ -4,20 +4,31 @@ interface GameState {
   lives: number; // Vidas restantes
   score: number; // Puntuación actual
   level: number; // Nivel del juego
+  mode: 'learn' | 'memorize'; // Modo de juego
 
   // Acciones
   loseLife: () => void;
   addScore: (points: number) => void;
   nextLevel: () => void;
   resetGame: () => void;
+  changeModeLearn: () => void;
+  changeModeMem: () => void;
 }
 
-// Crear la tienda con Zustand
 const GameState = create<GameState>((set) => ({
   lives: 3,
   score: 0,
   level: 1,
+  mode: 'learn',
 
+  changeModeLearn: () => set(() => {
+    console.log('changeModeLearn');
+    return { mode: 'learn' };
+  }),
+  changeModeMem: () => set(() => {
+    console.log('changeModeMem');
+    return { mode: 'memorize' };
+  }),
   loseLife: () => set((state) => {
     const newLives = Math.max(state.lives - 1, 0);
     console.log('loseLife:', newLives);
