@@ -22,6 +22,10 @@ export const GamePlay: React.FC = () => {
     const { lives, score, level, mode } = GameState();
     const [currentLetter, setCurrentLetter] = useState<string | null>(null);
 
+    const handleLetterGenerated = (letter: string) => {
+        console.log('Letra generada:', letter); 
+        setCurrentLetter(letter);
+    };
 
     //test
     useEffect(() => {
@@ -59,6 +63,10 @@ export const GamePlay: React.FC = () => {
             if (imageSrc) {
                 const formData = new FormData();
                 formData.append('file', dataURItoBlob(imageSrc), 'screenshot.jpg');
+                if (currentLetter) {
+                    formData.append('label', currentLetter); 
+                }
+
                 try {
                     console.log('Enviando al backend...');
                     // Enviar al backend
@@ -68,6 +76,7 @@ export const GamePlay: React.FC = () => {
                     });
                     const data = await response.json();
                     setPrediction(data.prediction);
+                    console.log('Respuesta del backend:', data);
                 } catch (error) {
                     console.error('Error al enviar al backend:', error);
                 }
@@ -81,7 +90,7 @@ export const GamePlay: React.FC = () => {
         return () => {
             running = false;
         };
-    }, [isCameraReady]);
+    }, [isCameraReady, currentLetter]);
 
     function dataURItoBlob(dataURI: string) {
         const byteString = atob(dataURI.split(',')[1]);
