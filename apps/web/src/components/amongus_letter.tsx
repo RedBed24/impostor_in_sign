@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Box, Image, Stack } from '@mantine/core';
 import { useSpring, animated } from '@react-spring/web';
 import GameState from '../store/game-state';
@@ -8,9 +8,10 @@ interface AmongusLetterProps {
   speed: number;
   isPaused: boolean;
   color: string | null;
+  onLetterGenerated: (letter: string) => void;
 }
 
-const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaused, color = 'red'}) => {
+const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaused, color = 'red', onLetterGenerated}) => {
   const [correct, setCorrect] = useState<boolean>(false);
   const [incorrect, setIncorrect] = useState<boolean>(false);
   const [letter, setLetter] = useState<string>('');
@@ -21,6 +22,32 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
   const [verticalPosition, setVerticalPosition] = useState<number>(0); // Posición vertical inicial
   const [movingVertically, setMovingVertically] = useState<boolean>(false); // Control del movimiento vertical
   const containerRef = useRef<HTMLDivElement>(null); // Referencia al contenedor
+  const resetCalledRef = useRef(false); // Controla si el reset ya se llamó en este ciclo
+  const score = color === 'yellow' ? 5 : 1;
+
+  const generateRandomLetter = useCallback(() => {
+    // const letters = 'ABCDEFGHIKLMNOPRSTUVWXYZ';
+    const letters = 'ABCDEFGIKLMNORSTUVWXYZ';
+    const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+    setLetter(randomLetter);
+    onLetterGenerated(randomLetter);
+  }, [onLetterGenerated]);
+
+  useEffect(() => {
+    generateRandomLetter();
+  }, []); // Solo genera una letra al principio
+
+
+  const reset = useCallback(() => {
+    resetCalledRef.current = false; // Permite que el reset sea llamado en el próximo ciclo
+      setCorrect(false);
+      generateRandomLetter();
+      setMovingVertically(false);
+      setVerticalPosition(calculateInitialVerticalPosition());
+      setAppliedChange(false);
+      setIncorrect(false);
+      console.log('reset');
+  }, [generateRandomLetter]);
 
   const [appliedChange, setAppliedChange] = useState<boolean>(false);
 
@@ -50,16 +77,10 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
     return () => clearInterval(interval);
   }, [isPaused]);
 
+
+
   useEffect(() => {
     let animationFrame: number;
-
-    const reset = () => {
-      setCorrect(false);
-      generateRandomLetter();
-      setMovingVertically(false);
-      setVerticalPosition(calculateInitialVerticalPosition());
-      setAppliedChange(false);
-    };
 
     const animate = () => {
       setPosition((prevPosition) => {
@@ -74,7 +95,6 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
           setMovingVertically(false);
         }
 
-        // Calcular posición vertical como una parábola
         if (movingVertically) {
           const peakX = window.innerWidth * 0.7;
           const height = -300; // Altura máxima de la parábola
@@ -83,15 +103,21 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
             const parabola = -height * Math.pow((newPosition - peakX) / widthFactor, 2) + height + 20;
             setVerticalPosition(parabola);
           } else {
-            setBackground('red');
             setIncorrect(true);
-            const straight = verticalPosition + speed;
-            setVerticalPosition(straight);
+            setBackground('red');
+            setVerticalPosition((prev) => prev + speed);
           }
         }
-
-
-        if (newPosition > window.innerWidth - 100 || verticalPosition > 120) {
+        
+        console.log('newPosition', newPosition);
+        console.log('vertical', verticalPosition);
+        if ((newPosition > window.innerWidth - 100 || verticalPosition > 120)
+          && !resetCalledRef.current) {
+          resetCalledRef.current = true;
+          if (!appliedChange) {
+            loseLife();
+            setAppliedChange(true);
+        }
           reset();
           return -150; // Vuelve a la izquierda, fuera de la pantalla
         }
@@ -106,7 +132,7 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
     animationFrame = requestAnimationFrame(animate);
 
     return () => cancelAnimationFrame(animationFrame); // Limpiar el frame al desmontar el componente
-  }, [speed, movingVertically, correct, verticalPosition, isPaused, incorrect, loseLife]);
+  }, [speed, movingVertically, correct, verticalPosition, isPaused, loseLife, reset]);
 
   // Usar React Spring para animar el movimiento
   const { left } = useSpring({
@@ -116,38 +142,26 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
     pause: isPaused,
   });
 
-  // Generar una letra aleatoria
-  const generateRandomLetter = () => {
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const randomLetter = letters[Math.floor(Math.random() * letters.length)];
-    setLetter(randomLetter);
-  };
 
-
-
-  useEffect(() => {
-    generateRandomLetter();
-  }, []); // Solo genera una letra al principio
-
-  // Cambiar el fondo cuando se adivina la letra
+  // se adivina la letra
   useEffect(() => {
     if (prediction && letter === prediction) {
-      if (!appliedChange) { setCorrect(true); addScore(1); setAppliedChange(true); }
-      generateRandomLetter(); 
+      if (!appliedChange) { setCorrect(true); addScore(score); setAppliedChange(true); console.log('correct'); }
+
     } else {
-      if (!appliedChange && incorrect) { loseLife(); setAppliedChange(true); }
+      if (!appliedChange && incorrect) { loseLife(); setAppliedChange(true); console.log('loselife'); }
       
       setBackground('white');
     }
-  }, [prediction, letter, addScore, appliedChange, loseLife, incorrect]);
+  }, [prediction, letter, appliedChange, incorrect]);
 
   return (
     <>
       <animated.div
         style={{
           position: 'absolute',
-          left: left, // Movimiento animado del personaje
-          top: verticalPosition, // Movimiento vertical controlado
+          left: left, 
+          top: verticalPosition, 
           opacity: position >= 0 ? 1 : 0, // Evita que sea visible cuando está fuera de la pantalla
         }}
       >
@@ -197,3 +211,4 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
 };
 
 export default AmongusLetter;
+
