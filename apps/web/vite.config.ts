@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/predict': 'http://localhost:8080', // Redirige todas las solicitudes a /predict al backend
+      '/predict': 'http://impostor-inference-model:8000'
     },
   },
 })
