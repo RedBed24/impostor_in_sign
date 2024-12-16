@@ -63,7 +63,7 @@ services:
     restart: on-failure
     healthcheck:
       test: curl --fail http://localhost:8000/iamalive || exit 1
-      interval: 2s
+      interval: 30s
       timeout: 5s
       retries: 3
       start_period: 5s
@@ -73,9 +73,19 @@ services:
     depends_on:
       application_initializer:
         condition: service_completed_successfully
+      mlflow:
+        condition: service_started
+      database:
+        condition: service_healthy
     build:
       context: apps
       dockerfile: inference_model/Dockerfile
+    env_file:
+      - .env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "${MONGO_INITDB_ROOT_USERNAME}"
+      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_INITDB_ROOT_PASSWORD}"
+      MONGO_DB_URL: "mongodb://impostor-database:27017"
     ports:
       - "8080:8000"
     volumes:
@@ -83,7 +93,7 @@ services:
     restart: on-failure
     healthcheck:
       test: curl --fail http://localhost:8000/iamalive || exit 1
-      interval: 2s
+      interval: 30s
       timeout: 5s
       retries: 3
       start_period: 5s
@@ -99,7 +109,47 @@ services:
       api:
         condition: service_healthy
 
+  airflow:
+    container_name: impostor-airflow
+    depends_on:
+      api:
+        condition: service_healthy
+    build:
+      context: apps
+      dockerfile: airflow/Dockerfile
+    env_file:
+      - .env
+    environment:
+      API_URL: "http://impostor-api:8000"
+      _AIRFLOW_WWW_USER_CREATE: 'true'
+      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
+      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
+    ports:
+      - "5000:8080"
+    volumes:
+      - airflow:/opt/airflow
+    command: bash -c "airflow db init && airflow scheduler & airflow webserver"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: on-failure
+    
+  mlflow:
+    container_name: impostor-mlflow
+    ports:
+      - "8888:8888"
+    build:
+      context: apps
+      dockerfile: mlflow/Dockerfile
+    volumes:
+      - mlflow:/mlflow
+
 volumes:
   mongo-data:
   mongo-log:
   apps:
+  airflow:
+  mlflow:
