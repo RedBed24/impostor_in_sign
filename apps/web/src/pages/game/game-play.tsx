@@ -29,22 +29,22 @@ export const GamePlay: React.FC = () => {
     };
 
     //test
-    useEffect(() => {
-        const handleKeyDown = (event: KeyboardEvent) => {
-            setPrediction(event.key.toUpperCase());
-        };
+    // useEffect(() => {
+    //     const handleKeyDown = (event: KeyboardEvent) => {
+    //         setPrediction(event.key.toUpperCase());
+    //     };
 
-        window.addEventListener('keydown', handleKeyDown);
+    //     window.addEventListener('keydown', handleKeyDown);
 
-        return () => {
-            window.removeEventListener('keydown', handleKeyDown);
-        };
-    }, []);
+    //     return () => {
+    //         window.removeEventListener('keydown', handleKeyDown);
+    //     };
+    // }, []);
 
 
     const handleUserMedia = () => {
         console.log("Cámara lista");
-        setCameraReady(false);
+        setCameraReady(true);
     };
 
     useEffect(() => {
