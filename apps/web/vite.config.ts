@@ -6,7 +6,9 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/predict': 'http://impostor-inference-model:8000'
-    },
-  },
+      '/api/img': 'http://impostor-api:8000',
+      '/token': 'http://impostor-api:8000',
+      '/predict': 'http://impostor-inference-model:8000',
+    }
+  }
 })
