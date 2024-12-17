@@ -1,6 +1,7 @@
 import { Link, Route, Switch } from 'wouter';
 import { Button, Container } from '@mantine/core';
 import { GameHome } from './pages/game/game-home';
+import { GamePlay } from './pages/game/game-play';
 
 export const App: React.FC = () => {
 
@@ -17,6 +18,7 @@ export const App: React.FC = () => {
         <Switch>
           <Route path="/game" component={GameHome} />
           <Route path="/dasboard" />
+          <Route path="/gameplay" component={GamePlay} />
         </Switch>
       </Container>
     </>
