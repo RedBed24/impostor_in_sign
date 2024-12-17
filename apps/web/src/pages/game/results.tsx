@@ -27,7 +27,7 @@ export const Results: React.FC = () => {
 
   return (
     <>
-      <Container p={0}>
+      <Container p={0} fluid>
         <BackgroundImage
           src="/src/assets/dotted_background.jpg"
           style={{

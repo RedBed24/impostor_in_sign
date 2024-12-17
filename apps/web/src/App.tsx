@@ -9,7 +9,7 @@ export const App: React.FC = () => {
 
   return (
     <>
-    <Container size="xl" py="xl" bg='gray.2' m={0} fluid>
+    <Container size="xl" py="xl" bg='gray.2' m={0} fluid p={0}>
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/game" component={GameHome}/>

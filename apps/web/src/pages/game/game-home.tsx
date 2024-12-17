@@ -12,7 +12,7 @@ export const GameHome: React.FC = () => {
   const { resetGame, changeModeLearn, changeModeMem } = GameState();
 
   return (
-    <><Container p={0}>
+    <><Container p={0} fluid>
       {!isImageLoaded && (
         <Skeleton
           visible={!isImageLoaded}
