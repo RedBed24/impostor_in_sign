@@ -8,6 +8,7 @@ export default defineConfig({
     proxy: {
       '/api/img': 'http://impostor-api:8000',
       '/token': 'http://impostor-api:8000',
+      '/predict': 'http://impostor-inference-model:8000',
     }
   }
 })
