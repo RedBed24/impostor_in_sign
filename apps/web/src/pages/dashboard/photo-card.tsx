@@ -61,10 +61,12 @@ export const PhotoCard: React.FC<PhotoCardProps> = ({ imageID, initlabel, getTok
         setIsEditable(false);
       } else {
         console.error('Failed to update label:', data);
+        setLabel(initlabel);
       }
     }
     catch (error) {
       console.error('Error updating label:', error);
+      setLabel(initlabel);
     }
   };
 
