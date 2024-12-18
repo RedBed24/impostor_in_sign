@@ -90,7 +90,7 @@ services:
       - "8080:8000"
     volumes:
       - apps:/shared-data
-    restart: on-failure
+    restart: unless-stopped
     healthcheck:
       test: curl --fail http://localhost:8000/iamalive || exit 1
       interval: 30s
@@ -135,7 +135,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    restart: on-failure
+    restart: unless-stopped
     
   mlflow:
     container_name: impostor-mlflow
