@@ -118,7 +118,7 @@ export const GamePlay: React.FC = () => {
                 src="/src/assets/fondo_bloques.png"
                 style={{
                     width: '99vw',
-                    height: '98vh',
+                    height: '99vh',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat',
@@ -165,8 +165,8 @@ export const GamePlay: React.FC = () => {
                         <Text fz={30} c='white' mr={50}>SCORE: {score}</Text>
                         <Button size="xl" onClick={() => setIsPaused(true)}><Pause /> </Button>
                     </Grid.Col>
-                    <Grid.Col style={{ position: 'absolute', top: '57%' }}>
-                        <AmongusLetter prediction={prediction} speed={5} isPaused={isPaused} color='red'
+                    <Grid.Col style={{ position: 'absolute', top: '51%' }}>
+                        <AmongusLetter prediction={prediction} speed={3} isPaused={isPaused} color='red'
                             onLetterGenerated={handleLetterGenerated} />
                         {score >= 10 && score < 30 && <AmongusLetter prediction={prediction} speed={4} isPaused={isPaused} color='yellow'
                             onLetterGenerated={handleLetterGenerated} />}
