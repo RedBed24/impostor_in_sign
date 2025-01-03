@@ -1,5 +1,5 @@
-import { Text, Group, Box, BackgroundImage, Grid, Button, Modal, Stack, Image } from '@mantine/core';
-import { Pause, Play, LogOut } from 'lucide-react';
+import { Text, Group, Box, BackgroundImage, Grid, Button, Modal, Stack, Image, Alert } from '@mantine/core';
+import { Pause, Play, LogOut, XCircle } from 'lucide-react';
 import { Link } from 'wouter';
 
 import Webcam from "react-webcam";
@@ -22,6 +22,7 @@ export const GamePlay: React.FC = () => {
     const [isPaused, setIsPaused] = useState(true);
     const { lives, score, level, mode } = GameState();
     const [currentLetter, setCurrentLetter] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     const handleLetterGenerated = useCallback((letter: string) => {
         console.log('Letra generada:', letter);
@@ -181,9 +182,15 @@ export const GamePlay: React.FC = () => {
                     <Stack>
                         <Button onClick={() => setIsPaused(false)} rightSection={<Play />}>JUGAR</Button>
                         <Link href='/game'>
-                        <Button color='red' w='100%' rightSection={<LogOut />}>SALIR</Button>
+                            <Button color='red' w='100%' rightSection={<LogOut />}>SALIR</Button>
                         </Link>
-                        
+                        {error && (
+                            <Alert color="rgba(255, 0, 0, 1)" title="Error" 
+                                onClose={() => setError(null)}
+                                icon={<XCircle color='red' />}>
+                            {error}
+                            </Alert>
+                        )}
                     </Stack>
 
                 </Modal>

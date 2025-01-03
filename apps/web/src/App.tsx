@@ -4,6 +4,7 @@ import { GameHome } from './pages/game/game-home';
 import { GamePlay } from './pages/game/game-play';
 import { ImageGrid } from './pages/dashboard/image-grid';
 import { Home } from './pages/home';
+import { NotFound } from './pages/not-found';
 
 export const App: React.FC = () => {
 
@@ -15,6 +16,7 @@ export const App: React.FC = () => {
           <Route path="/game" component={GameHome}/>
           <Route path="/dashboard" component={ImageGrid} />
           <Route path="/gameplay" component={GamePlay} />
+          <Route component={NotFound}></Route>
         </Switch>
     </Container>
     </>
