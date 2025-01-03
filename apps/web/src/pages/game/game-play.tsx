@@ -3,7 +3,7 @@ import { Pause, Play, LogOut } from 'lucide-react';
 import { Link } from 'wouter';
 
 import Webcam from "react-webcam";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import AmongusLetter from '../../components/amongus_letter';
 import GameState from '../../store/game-state';
 import { Results } from './results';
@@ -23,10 +23,10 @@ export const GamePlay: React.FC = () => {
     const { lives, score, level, mode } = GameState();
     const [currentLetter, setCurrentLetter] = useState<string | null>(null);
 
-    const handleLetterGenerated = (letter: string) => {
-        console.log('Letra generada:', letter); 
+    const handleLetterGenerated = useCallback((letter: string) => {
+        console.log('Letra generada:', letter);
         setCurrentLetter(letter);
-    };
+    }, []);
 
     //test
     // useEffect(() => {
@@ -42,55 +42,55 @@ export const GamePlay: React.FC = () => {
     // }, []);
 
 
-    const handleUserMedia = () => {
+    const handleUserMedia = useCallback(() => {
         console.log("Cámara lista");
         setCameraReady(true);
-    };
+    }, []);
+
+
+    const captureFrame = useCallback(async () => {
+        if (!webcamRef.current) return;
+
+        const imageSrc = webcamRef.current.getScreenshot();
+        if (!imageSrc) {
+            console.error("No se pudo capturar una imagen desde la cámara.");
+            setError("Error, no se puede acceder a la cámara");
+            setIsPaused(true);
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', dataURItoBlob(imageSrc), 'screenshot.jpg');
+        if (currentLetter) {
+            formData.append('label', currentLetter);
+        }
+
+        try {
+            const response = await fetch('/predict', {
+                method: 'POST',
+                body: formData,
+            });
+            const data = await response.json();
+            setPrediction(data.prediction);
+            console.log('Respuesta del backend:', data);
+            setError(null);
+        } catch (error) {
+            console.error('Error al enviar al backend:', error);
+            setError('Error, el servidor no responde.');
+            setIsPaused(true);
+        }
+    }, [currentLetter]);
+
 
     useEffect(() => {
         if (!isCameraReady) return;
 
-        let running = true;
+        const interval = setInterval(() => {
+            captureFrame();
+        }, 700); // Ajustar para capturar cada segundo
 
-        const captureAndSendFrame = async () => {
-            await new Promise(resolve => setTimeout(resolve, 1000)); //cambia demasiado
-            if (!running || !webcamRef.current) return;
-
-            // Capturar la imagen de la cámara como una base64
-            const imageSrc = webcamRef.current?.getScreenshot();
-            if (!imageSrc) {
-                console.error("No se pudo capturar una imagen desde la cámara.");
-            }
-            if (imageSrc) {
-                const formData = new FormData();
-                formData.append('file', dataURItoBlob(imageSrc), 'screenshot.jpg');
-                if (currentLetter) {
-                    formData.append('label', currentLetter); 
-                }
-
-                try {
-                    // Enviar al backend
-                    const response = await fetch('/predict', {
-                        method: 'POST',
-                        body: formData,
-                    });
-                    const data = await response.json();
-                    setPrediction(data.prediction);
-                    console.log('Respuesta del backend:', data);
-                } catch (error) {
-                    console.error('Error al enviar al backend:', error);
-                }
-            }
-
-            requestAnimationFrame(captureAndSendFrame);
-        };
-        captureAndSendFrame();
-
-        // Limpiar el bucle cuando se desmonte el componente
-        return () => {
-            running = false;
-        };
-    }, [isCameraReady, currentLetter]);
+        return () => clearInterval(interval);
+    }, [isCameraReady, captureFrame]);
 
     function dataURItoBlob(dataURI: string) {
         const byteString = atob(dataURI.split(',')[1]);
@@ -102,6 +102,8 @@ export const GamePlay: React.FC = () => {
         }
         return new Blob([ab], { type: mimeString });
     }
+
+    const imageSrc = useMemo(() => `/src/assets/letters/${currentLetter}.png`, [currentLetter]);
 
     if (lives < 1) {
         return <Results />;
@@ -131,9 +133,9 @@ export const GamePlay: React.FC = () => {
                                 border: "3px solid #FFFFFF",
                                 borderRadius: "15px", align: 'flex-start', marginLeft: 30, marginRight: 150
                             }}>
-                                <Image width={50} height={50} src={lives >= 1 ? "/src/assets/vida.png" : "/src/assets/muerte.png"} />
-                                <Image width={50} height={50} src={lives >= 2 ? "/src/assets/vida.png" : "/src/assets/muerte.png"} />
-                                <Image width={50} height={50} src={lives == 3 ? "/src/assets/vida.png" : "/src/assets/muerte.png"} />
+                                <Image width={50} height={50} alt='live1' src={lives >= 1 ? "/src/assets/vida.png" : "/src/assets/muerte.png"} />
+                                <Image width={50} height={50} alt='live2' src={lives >= 2 ? "/src/assets/vida.png" : "/src/assets/muerte.png"} />
+                                <Image width={50} height={50} alt='live3' src={lives == 3 ? "/src/assets/vida.png" : "/src/assets/muerte.png"} />
                             </Box>
                             <Box ml={60}
                                 style={{
@@ -153,7 +155,7 @@ export const GamePlay: React.FC = () => {
                             </Box>
                             <Stack>
                                 <Text fz={30} c='white'>PREDICTION: {prediction}</Text>
-                                {mode === 'learn' && <Image width={50} height={50} src={`/src/assets/letters/${currentLetter}.jpg`} fit='contain'/>}
+                                {mode === 'learn' && <Image width={50} height={50} src={imageSrc} fit='contain' />}
                             </Stack>
 
                         </Group>
@@ -163,10 +165,10 @@ export const GamePlay: React.FC = () => {
                         <Button size="xl" onClick={() => setIsPaused(true)}><Pause /> </Button>
                     </Grid.Col>
                     <Grid.Col style={{ position: 'absolute', top: '57%' }}>
-                        <AmongusLetter prediction={prediction} speed={5} isPaused={isPaused} color='red' 
-                        onLetterGenerated={handleLetterGenerated}/>
-                        {score >= 10 && score < 30 && <AmongusLetter prediction={prediction} speed={4} isPaused={isPaused} color='yellow' 
-                        onLetterGenerated={handleLetterGenerated}/>}
+                        <AmongusLetter prediction={prediction} speed={5} isPaused={isPaused} color='red'
+                            onLetterGenerated={handleLetterGenerated} />
+                        {score >= 10 && score < 30 && <AmongusLetter prediction={prediction} speed={4} isPaused={isPaused} color='yellow'
+                            onLetterGenerated={handleLetterGenerated} />}
                     </Grid.Col>
                 </Grid>
 
