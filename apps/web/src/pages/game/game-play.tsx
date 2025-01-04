@@ -115,14 +115,16 @@ export const GamePlay: React.FC = () => {
         }
         return new Blob([ab], { type: mimeString });
     }
+    
+    const changeBoxColor = useCallback((color: string) => {
+        setBoxColor(color);
+        setTimeout(() => changeBoxColor('#4a90e2'), 700);
+      }, []);
 
     if (lives < 1) {
         return <Results />;
     }
 
-    const changeBoxColor = useCallback((color: string) => {
-        setBoxColor(color);
-      }, []);
       
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     return (

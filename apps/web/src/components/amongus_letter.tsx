@@ -149,13 +149,11 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
     if (prediction && letter === prediction) {
       if (!appliedChange) { setCorrect(true); addScore(score); setAppliedChange(true); console.log('correct');
         changeBoxColor('lime');
-        setTimeout(() => {changeBoxColor('#4a90e2'); console.log('color')}, 700);
        }
 
     } else {
       if (!appliedChange && incorrect) { loseLife(); setAppliedChange(true); console.log('loselife'); 
         changeBoxColor('red');
-        setTimeout(() => changeBoxColor('#4a90e2'), 700);
       }
       
       setBackground('white');
