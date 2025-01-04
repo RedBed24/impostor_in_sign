@@ -21,7 +21,7 @@ export const GamePlay: React.FC = () => {
     const [prediction, setPrediction] = useState<string | null>(null);
     const [isCameraReady, setCameraReady] = useState(false);
     const [isPaused, setIsPaused] = useState(true);
-    const { lives, score, nextLevel, mode } = GameState();
+    const { lives, score, nextLevel, level, mode } = GameState();
     const [currentLetter, setCurrentLetter] = useState<string | null>(null);
     const [showLevelUp, setShowLevelUp] = useState(false);
     const [levelChanged, setLevelChanged] = useState(false);
@@ -44,12 +44,12 @@ export const GamePlay: React.FC = () => {
     //     };
     // }, []);
     useEffect(() => {
-        if (score > 0 && score % 10 === 0 && !levelChanged) {
+        if (score > 0 && score % 5 === 0 && !levelChanged) {
             nextLevel();
             setShowLevelUp(true);
             setLevelChanged(true); 
         }
-        if (score % 2 === 1) {
+        if (score % 5 === 1) {
             setLevelChanged(false);
         }
     }, [score, levelChanged, nextLevel]);
@@ -132,7 +132,8 @@ export const GamePlay: React.FC = () => {
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat',
                     display: 'flex',
-                    flexDirection: 'column'
+                    flexDirection: 'column',
+                    filter: level === 3 ? 'grayscale(50%)' : 'none'
                 }}
             >
                 {showLevelUp && <LevelUp onComplete={()=> setShowLevelUp(false)} />}
@@ -172,11 +173,14 @@ export const GamePlay: React.FC = () => {
                         </Group>
                     </Grid.Col>
                     <Grid.Col span={4} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                        <Text fz={30} c='white' mr={50}>SCORE: {score}</Text>
+                        <Stack mr={50} gap={0}>
+                        <Text fz={30} c='white'>LEVEL: {level}</Text>
+                        <Text fz={28} c='white'>SCORE: {score}</Text>
+                        </Stack>
                         <Button size="xl" onClick={() => setIsPaused(true)}><Pause /> </Button>
                     </Grid.Col>
                     <Grid.Col style={{ position: 'absolute', top: '57%' }}>
-                        <AmongusLetter prediction={prediction} speed={5} isPaused={isPaused} color='red' 
+                        <AmongusLetter prediction={prediction} speed={5} isPaused={isPaused} color={level % 2 === 0 ? 'red' : 'white'} 
                         onLetterGenerated={handleLetterGenerated}/>
                         {score >= 10 && score < 30 && <AmongusLetter prediction={prediction} speed={4} isPaused={isPaused} color='yellow' 
                         onLetterGenerated={handleLetterGenerated}/>}
