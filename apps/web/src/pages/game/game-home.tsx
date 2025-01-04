@@ -1,4 +1,4 @@
-import { Container, Title, Text, Group, Box, BackgroundImage, Grid, Button, Stack, Image, Skeleton } from '@mantine/core';
+import { Container, Title, Text, Group, Box, BackgroundImage, Grid, Button, Stack, Image, Skeleton, Tooltip } from '@mantine/core';
 import { Link, Route, Switch } from 'wouter';
 import { Play, CircleHelp, House, GraduationCap, Brain } from 'lucide-react';
 import { useState } from 'react';
@@ -63,10 +63,14 @@ export const GameHome: React.FC = () => {
           </Group>
           <Stack>
             <Link href='/gameplay'>
+            <Tooltip label='Modo con fotos de los gestos' position='top' color='gray' withArrow>
               <Button size='lg' leftSection={<GraduationCap/>} rightSection={<Play />} onClick={() => { resetGame(); changeModeLearn(); }} color='green' w='100%'>JUGAR Aprender</Button>
+            </Tooltip>
             </Link>
             <Link href='/gameplay'>
+            <Tooltip label='Modo sin ayudas' position='bottom' color='gray' withArrow>
               <Button size='lg' leftSection={<Brain/>} rightSection={<Play />} onClick={() => { resetGame(); changeModeMem(); }} color='green'>JUGAR Memorizar</Button>
+            </Tooltip>
             </Link>
             <Button size='lg' rightSection={<CircleHelp />} mt='xl'>AYUDA</Button>
             <Link href='/'>
