@@ -3,7 +3,7 @@ import { Pause, Play, LogOut } from 'lucide-react';
 import { Link } from 'wouter';
 
 import Webcam from "react-webcam";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import AmongusLetter from '../../components/amongus_letter';
 import GameState from '../../store/game-state';
 import { Results } from './results';
@@ -25,8 +25,9 @@ export const GamePlay: React.FC = () => {
     const [currentLetter, setCurrentLetter] = useState<string | null>(null);
     const [showLevelUp, setShowLevelUp] = useState(false);
     const [levelChanged, setLevelChanged] = useState(false);
+    const [boxColor, setBoxColor] = useState('#4a90e2');
 
-    const handleLetterGenerated = (letter: string) => {
+    const handleLetterGenerated = useCallback((letter: string) => {
         console.log('Letra generada:', letter); 
         setCurrentLetter(letter);
     };
@@ -119,7 +120,10 @@ export const GamePlay: React.FC = () => {
         return <Results />;
     }
 
-
+    const changeBoxColor = useCallback((color: string) => {
+        setBoxColor(color);
+      }, []);
+      
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     return (
         <>
@@ -152,7 +156,7 @@ export const GamePlay: React.FC = () => {
                             <Box ml={60}
                                 style={{
                                     height: "210px",
-                                    border: "5px solid #4a90e2",
+                                    border: `5px solid ${boxColor}`,
                                     borderRadius: "10px",
                                 }}>
                                 <Webcam
@@ -180,10 +184,12 @@ export const GamePlay: React.FC = () => {
                         <Button size="xl" onClick={() => setIsPaused(true)}><Pause /> </Button>
                     </Grid.Col>
                     <Grid.Col style={{ position: 'absolute', top: '57%' }}>
-                        <AmongusLetter prediction={prediction} speed={5} isPaused={isPaused} color={level % 2 === 0 ? 'red' : 'white'} 
-                        onLetterGenerated={handleLetterGenerated}/>
-                        {score >= 10 && score < 30 && <AmongusLetter prediction={prediction} speed={4} isPaused={isPaused} color='yellow' 
-                        onLetterGenerated={handleLetterGenerated}/>}
+                        <AmongusLetter prediction={prediction} speed={3} isPaused={isPaused} color={level % 2 === 1 ? 'red' : 'white'} 
+                        onLetterGenerated={handleLetterGenerated}
+                        changeBoxColor={changeBoxColor}/>
+                        {score >= 10 && score < 30 && <AmongusLetter prediction={prediction} speed={3} isPaused={isPaused} color='yellow' 
+                        onLetterGenerated={handleLetterGenerated}
+                        changeBoxColor={changeBoxColor}/>}
                     </Grid.Col>
                 </Grid>
 

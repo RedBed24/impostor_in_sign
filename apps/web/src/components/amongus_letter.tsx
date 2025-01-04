@@ -8,10 +8,11 @@ interface AmongusLetterProps {
   speed: number;
   isPaused: boolean;
   color: string | null;
+  changeBoxColor: (color: string) => void;
   onLetterGenerated: (letter: string) => void;
 }
 
-const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaused, color = 'red', onLetterGenerated}) => {
+const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaused, color = 'red', onLetterGenerated, changeBoxColor}) => {
   const [correct, setCorrect] = useState<boolean>(false);
   const [incorrect, setIncorrect] = useState<boolean>(false);
   const [letter, setLetter] = useState<string>('');
@@ -109,8 +110,8 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
           }
         }
         
-        console.log('newPosition', newPosition);
-        console.log('vertical', verticalPosition);
+        // console.log('newPosition', newPosition);
+        // console.log('vertical', verticalPosition);
         if ((newPosition > window.innerWidth - 100 || verticalPosition > 120)
           && !resetCalledRef.current) {
           resetCalledRef.current = true;
@@ -146,10 +147,16 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
   // se adivina la letra
   useEffect(() => {
     if (prediction && letter === prediction) {
-      if (!appliedChange) { setCorrect(true); addScore(score); setAppliedChange(true); console.log('correct'); }
+      if (!appliedChange) { setCorrect(true); addScore(score); setAppliedChange(true); console.log('correct');
+        changeBoxColor('lime');
+        setTimeout(() => {changeBoxColor('#4a90e2'); console.log('color')}, 700);
+       }
 
     } else {
-      if (!appliedChange && incorrect) { loseLife(); setAppliedChange(true); console.log('loselife'); }
+      if (!appliedChange && incorrect) { loseLife(); setAppliedChange(true); console.log('loselife'); 
+        changeBoxColor('red');
+        setTimeout(() => changeBoxColor('#4a90e2'), 700);
+      }
       
       setBackground('white');
     }
