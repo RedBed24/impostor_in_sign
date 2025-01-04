@@ -30,7 +30,7 @@ export const GamePlay: React.FC = () => {
     const handleLetterGenerated = useCallback((letter: string) => {
         console.log('Letra generada:', letter); 
         setCurrentLetter(letter);
-    };
+    }, []);
 
     //test
     // useEffect(() => {
@@ -45,7 +45,7 @@ export const GamePlay: React.FC = () => {
     //     };
     // }, []);
     useEffect(() => {
-        if (score > 0 && score % 5 === 0 && !levelChanged) {
+        if (score > 0 && score >= level*5 && score < (level+1)*5  && !levelChanged) {
             nextLevel();
             setShowLevelUp(true);
             setLevelChanged(true); 
@@ -66,7 +66,7 @@ export const GamePlay: React.FC = () => {
         let running = true;
 
         const captureAndSendFrame = async () => {
-            await new Promise(resolve => setTimeout(resolve, 1000)); //cambia demasiado
+            await new Promise(resolve => setTimeout(resolve, 50)); //cambia demasiado
             if (!running || !webcamRef.current) return;
 
             // Capturar la imagen de la cámara como una base64
@@ -89,7 +89,7 @@ export const GamePlay: React.FC = () => {
                     });
                     const data = await response.json();
                     setPrediction(data.prediction);
-                    console.log('Respuesta del backend:', data);
+                    // console.log('Respuesta del backend:', data);
                 } catch (error) {
                     console.error('Error al enviar al backend:', error);
                 }
@@ -137,7 +137,6 @@ export const GamePlay: React.FC = () => {
                     backgroundRepeat: 'no-repeat',
                     display: 'flex',
                     flexDirection: 'column',
-                    filter: level === 3 ? 'grayscale(50%)' : 'none'
                 }}
             >
                 {showLevelUp && <LevelUp onComplete={()=> setShowLevelUp(false)} />}
@@ -169,9 +168,9 @@ export const GamePlay: React.FC = () => {
                                     onUserMedia={handleUserMedia}
                                 />
                             </Box>
-                            <Stack>
-                                <Text fz={30} c='white'>PREDICTION: {prediction}</Text>
-                                {mode === 'learn' && <Image width={50} height={50} src={`/src/assets/letters/${currentLetter}.jpg`} fit='contain'/>}
+                            <Stack gap={0}>
+                                <Text fz={30} c='white'>LETRA</Text>
+                                {mode === 'learn' && <Image width={150} height={150} src={`/src/assets/letters/${currentLetter}.jpg`} fit='contain'/>}
                             </Stack>
 
                         </Group>
