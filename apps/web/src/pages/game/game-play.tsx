@@ -195,7 +195,8 @@ export const GamePlay: React.FC = () => {
                 </Grid>
 
 
-                <Modal opened={isPaused} onClose={() => setIsPaused(false)} title="Menú de Pausa" centered
+                <Modal opened={isPaused} onClose={() => setIsPaused(false)} title={`MODO DE JUEGO ${mode === 'learn' ? 'APRENDIZAJE' : 'MEMORIZAR'}  -  Menú de Pausa`} 
+                    centered
                     overlayProps={{
                         backgroundOpacity: 0.55,
                         blur: 1,
