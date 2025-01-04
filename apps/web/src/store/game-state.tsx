@@ -5,6 +5,8 @@ interface GameState {
   score: number; // Puntuación actual
   level: number; // Nivel del juego
   mode: 'learn' | 'memorize'; // Modo de juego
+  scoreToLevel: number; // Cada X puntos se sube de nivel
+  yellowEvent: [number, number]; // Evento amarillo, [nivel inicio, nivel fin]
 
   // Acciones
   loseLife: () => void;
@@ -20,6 +22,8 @@ const GameState = create<GameState>((set) => ({
   score: 0,
   level: 1,
   mode: 'learn',
+  scoreToLevel: 10,
+  yellowEvent: [2, 5],
 
   changeModeLearn: () => set(() => {
     console.log('changeModeLearn');

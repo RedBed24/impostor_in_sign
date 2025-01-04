@@ -21,7 +21,7 @@ export const GamePlay: React.FC = () => {
     const [prediction, setPrediction] = useState<string | null>(null);
     const [isCameraReady, setCameraReady] = useState(false);
     const [isPaused, setIsPaused] = useState(true);
-    const { lives, score, nextLevel, level, mode } = GameState();
+    const { lives, score, nextLevel, level, mode, scoreToLevel, yellowEvent } = GameState();
     const [currentLetter, setCurrentLetter] = useState<string | null>(null);
     const [showLevelUp, setShowLevelUp] = useState(false);
     const [levelChanged, setLevelChanged] = useState(false);
@@ -45,7 +45,7 @@ export const GamePlay: React.FC = () => {
     //     };
     // }, []);
     useEffect(() => {
-        if (score > 0 && score >= level*5 && score < (level+1)*5  && !levelChanged) {
+        if (score > 0 && score >= level*scoreToLevel && score < (level+1)*scoreToLevel  && !levelChanged) {
             nextLevel();
             setShowLevelUp(true);
             setLevelChanged(true); 
@@ -186,7 +186,7 @@ export const GamePlay: React.FC = () => {
                         <AmongusLetter prediction={prediction} speed={3} isPaused={isPaused} color={level % 2 === 1 ? 'red' : 'white'} 
                         onLetterGenerated={handleLetterGenerated}
                         changeBoxColor={changeBoxColor}/>
-                        {score >= 10 && score < 30 && <AmongusLetter prediction={prediction} speed={3} isPaused={isPaused} color='yellow' 
+                        {level >= yellowEvent[0] && level < yellowEvent[1] && <AmongusLetter prediction={prediction} speed={3} isPaused={isPaused} color='yellow' 
                         onLetterGenerated={handleLetterGenerated}
                         changeBoxColor={changeBoxColor}/>}
                     </Grid.Col>
