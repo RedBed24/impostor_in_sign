@@ -7,6 +7,7 @@ import { useRef, useState, useEffect } from "react";
 import AmongusLetter from '../../components/amongus_letter';
 import GameState from '../../store/game-state';
 import { Results } from './results';
+import { LevelUp } from '../../components/level-up';
 
 const videoConstraints = {
     width: 200,
@@ -20,8 +21,10 @@ export const GamePlay: React.FC = () => {
     const [prediction, setPrediction] = useState<string | null>(null);
     const [isCameraReady, setCameraReady] = useState(false);
     const [isPaused, setIsPaused] = useState(true);
-    const { lives, score, level, mode } = GameState();
+    const { lives, score, nextLevel, mode } = GameState();
     const [currentLetter, setCurrentLetter] = useState<string | null>(null);
+    const [showLevelUp, setShowLevelUp] = useState(false);
+    const [levelChanged, setLevelChanged] = useState(false);
 
     const handleLetterGenerated = (letter: string) => {
         console.log('Letra generada:', letter); 
@@ -40,7 +43,16 @@ export const GamePlay: React.FC = () => {
     //         window.removeEventListener('keydown', handleKeyDown);
     //     };
     // }, []);
-
+    useEffect(() => {
+        if (score > 0 && score % 10 === 0 && !levelChanged) {
+            nextLevel();
+            setShowLevelUp(true);
+            setLevelChanged(true); 
+        }
+        if (score % 2 === 1) {
+            setLevelChanged(false);
+        }
+    }, [score, levelChanged, nextLevel]);
 
     const handleUserMedia = () => {
         console.log("Cámara lista");
@@ -123,6 +135,7 @@ export const GamePlay: React.FC = () => {
                     flexDirection: 'column'
                 }}
             >
+                {showLevelUp && <LevelUp onComplete={()=> setShowLevelUp(false)} />}
                 <Grid p={0}>
                     <Grid.Col span={8} mt={30}>
                         <Group style={{ width: '100%' }} display='flex' align='flex-start'>
