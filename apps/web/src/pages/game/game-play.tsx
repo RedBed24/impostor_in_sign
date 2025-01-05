@@ -1,5 +1,5 @@
 import { Text, Group, Box, BackgroundImage, Grid, Button, Modal, Stack, Image } from '@mantine/core';
-import { Pause, Play, LogOut } from 'lucide-react';
+import { Pause, Play, LogOut, HelpCircle } from 'lucide-react';
 import { Link } from 'wouter';
 
 import Webcam from "react-webcam";
@@ -7,6 +7,7 @@ import { useRef, useState, useEffect } from "react";
 import AmongusLetter from '../../components/amongus_letter';
 import GameState from '../../store/game-state';
 import { Results } from './results';
+import { HelpMenu } from './help-menu';
 
 const videoConstraints = {
     width: 200,
@@ -22,6 +23,7 @@ export const GamePlay: React.FC = () => {
     const [isPaused, setIsPaused] = useState(true);
     const { lives, score, level, mode } = GameState();
     const [currentLetter, setCurrentLetter] = useState<string | null>(null);
+    const [helpOpen, setHelpOpen] = useState(false);
 
     const handleLetterGenerated = (letter: string) => {
         console.log('Letra generada:', letter); 
@@ -178,13 +180,13 @@ export const GamePlay: React.FC = () => {
                     }}>
                     <Stack>
                         <Button onClick={() => setIsPaused(false)} rightSection={<Play />}>JUGAR</Button>
+                        <Button onClick={() => setHelpOpen(true)} rightSection={<HelpCircle />} variant='outline'>AYUDA</Button>
                         <Link href='/game'>
                         <Button color='red' w='100%' rightSection={<LogOut />}>SALIR</Button>
                         </Link>
-                        
                     </Stack>
-
                 </Modal>
+                {helpOpen && <HelpMenu handleClose={() => setHelpOpen(false)} />}
             </BackgroundImage>
         </>
     );

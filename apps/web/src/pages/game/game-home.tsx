@@ -2,13 +2,14 @@ import { Container, Title, Text, Group, Box, BackgroundImage, Grid, Button, Stac
 import { Link, Route, Switch } from 'wouter';
 import { Play, CircleHelp, House, GraduationCap, Brain } from 'lucide-react';
 import { useState } from 'react';
+import { HelpMenu } from './help-menu';
 
 import GameState from '../../store/game-state';
 
 
 export const GameHome: React.FC = () => {
   const [isImageLoaded, setImageLoaded] = useState(false);
-
+  const [isHelpOpen, setHelpOpen] = useState(false);
   const { resetGame, changeModeLearn, changeModeMem } = GameState();
 
   return (
@@ -72,7 +73,8 @@ export const GameHome: React.FC = () => {
               <Button size='lg' leftSection={<Brain/>} rightSection={<Play />} onClick={() => { resetGame(); changeModeMem(); }} color='green'>JUGAR Memorizar</Button>
             </Tooltip>
             </Link>
-            <Button size='lg' rightSection={<CircleHelp />} mt='xl'>AYUDA</Button>
+              <Button w='100%' size='lg' rightSection={<CircleHelp />} mt='xl' onClick={() => setHelpOpen(true)}>AYUDA</Button>
+              {isHelpOpen && <HelpMenu handleClose={()=> setHelpOpen(false)} />}
             <Link href='/'>
               <Button w='100%' size='lg' rightSection={<House />}>HOME</Button>
             </Link>
