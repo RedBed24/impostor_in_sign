@@ -23,7 +23,7 @@ export const GamePlay: React.FC = () => {
     const [isPaused, setIsPaused] = useState(true);
     const { lives, score, level, mode } = GameState();
     const [currentLetter, setCurrentLetter] = useState<string | null>(null);
-    const [helpOpen, setHelpOpen] = useState(false);
+    const [helpOpen, setHelpOpen] = useState(true);
 
     const handleLetterGenerated = (letter: string) => {
         console.log('Letra generada:', letter); 

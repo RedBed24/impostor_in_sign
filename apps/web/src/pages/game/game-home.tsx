@@ -75,9 +75,11 @@ export const GameHome: React.FC = () => {
             </Link>
               <Button w='100%' size='lg' rightSection={<CircleHelp />} mt='xl' onClick={() => setHelpOpen(true)}>AYUDA</Button>
               {isHelpOpen && <HelpMenu handleClose={()=> setHelpOpen(false)} />}
+              <Tooltip label='Volver al inicio' position='bottom' color='gray' withArrow>
             <Link href='/'>
               <Button w='100%' size='lg' rightSection={<House />}>HOME</Button>
             </Link>
+            </Tooltip>
           </Stack>
         </Stack>
       </BackgroundImage>
