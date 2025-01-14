@@ -54,9 +54,9 @@ def detect_points(img_bytes: bytes) -> pd.DataFrame:
     if len(x) != 21 or len(y) != 21:
         return pd.DataFrame()
 
-    x_expanded = pd.DataFrame([x], columns=[f'x_{i}' for i in range(len(x))])
-    y_expanded = pd.DataFrame([y], columns=[f'y_{i}' for i in range(len(y))])
-    df = pd.concat([x_expanded, y_expanded], axis=1)
+    columns = [f'{axis}_{i}' for axis in ('x', 'y') for i in range(21)]
+    data = x + y
+    df = pd.DataFrame([data], columns=columns)
     return df
 
 @app.post("/predict")
@@ -78,9 +78,10 @@ async def predict(background_tasks: BackgroundTasks, file: UploadFile = File(...
 
     if MLFLOW_AVAILABLE:
         background_tasks.add_task(log_mlflow, run_id=run_id, df = df, model = model, pred_time=end - init, prediction = prediction)
-
-    background_tasks.add_task(send_to_db, df, prediction, label, img_bytes)
-    
+        background_tasks.add_task(send_to_db, df, prediction, label, img_bytes)
+        
+    if not MLFLOW_AVAILABLE:
+        logging.info(f"=========Prediction: {prediction[0]}, Time: {end - init}")
     return {"prediction": prediction[0]}
     
 def send_to_db(df: pd.DataFrame, prediction: str, label: str, img_bytes: bytes) -> None:
