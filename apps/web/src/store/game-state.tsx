@@ -9,6 +9,7 @@ interface GameState {
   achieved_v: boolean; // numero para conseguir el logro de la V
   combo: number; // Contador de combos, con un fallo se reinicia
   achieved_protector: boolean; // logro de combo
+  achieved_top: boolean; // top3
 
   // Acciones
   loseLife: () => void;
@@ -29,6 +30,7 @@ const GameState = create<GameState>((set) => ({
   achieved_v: false,
   combo: 0,
   achieved_protector: false,
+  achieved_top: false,
 
   changeModeLearn: () => set(() => {
     console.log('changeModeLearn');
@@ -77,6 +79,7 @@ const GameState = create<GameState>((set) => ({
       achieved_v: false,
       combo: 0,
       achieved_protector: false,
+      achieved_top: false,
     };
   }),
 }));
