@@ -1,11 +1,13 @@
 import { Container, Group, BackgroundImage, Table, Image, Stack, Text, TextInput, Modal, Button, Badge, Tooltip } from '@mantine/core';
 import { useState } from 'react';
+import GameState from '../store/game-state';
 
 interface Avatar_RakingProps {
     position: number;
 }
 
 export const Avatar_Raking: React.FC<Avatar_RakingProps> = ({ position }) => {
+  const { achieved_v, score } = GameState();
     const generateRandomNumber = () => {
         return Math.floor(Math.random() * 16) + 1; //[1,16]
     };
@@ -13,11 +15,11 @@ export const Avatar_Raking: React.FC<Avatar_RakingProps> = ({ position }) => {
     const [imageIndex, setImageIndex] = useState(generateRandomNumber());
 
     const insignias = [
-        { name: '100: Misión Cumplida', achieved: true, path:'100.png' },
-        { name: 'Maestro de la V', achieved: false, path: 'gesto.png' },
-        { name: 'Protector', achieved: true, path:'shield.png' },
-        { name: 'Rescate Relámpago', achieved: false, path:'time.png' },
-        { name: 'En el Olimpo', achieved: true , path:'trophy.png' },
+      { name: '100: Misión Cumplida', achieved: score >= 100, path:'100.png' },
+      { name: 'Maestro de la V', achieved: achieved_v, path: 'gesto.png' },
+      { name: 'Protector', achieved: false, path:'shield.png' },
+      { name: 'Rescate Relámpago', achieved: false, path:'time.png' },
+      { name: 'En el Olimpo', achieved: false , path:'trophy.png' },
     ];
 
 
@@ -28,8 +30,9 @@ export const Avatar_Raking: React.FC<Avatar_RakingProps> = ({ position }) => {
                 fit='contain'/>
             <Group>
           {/* Renderizamos las insignias */}
-          {insignias.map((insignia) => (
+          {insignias.map((insignia, index) => (
             <Tooltip
+              key={index}
               label={insignia.name}
               position="top"
               withArrow

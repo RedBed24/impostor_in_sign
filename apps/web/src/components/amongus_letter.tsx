@@ -27,7 +27,7 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
 
   const generateRandomLetter = useCallback(() => {
     // const letters = 'ABCDEFGHIKLMNOPRSTUVWXYZ';
-    const letters = 'ABCDEFGIKLMNORSTUVWXYZ';
+    const letters = 'V';
     const randomLetter = letters[Math.floor(Math.random() * letters.length)];
     setLetter(randomLetter);
     onLetterGenerated(randomLetter);
@@ -51,7 +51,7 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
 
   const [appliedChange, setAppliedChange] = useState<boolean>(false);
 
-  const { loseLife, addScore } = GameState();
+  const { loseLife, addScore, addCount_v } = GameState();
 
   const calculateInitialVerticalPosition = () => {
     if (containerRef.current) {
@@ -155,10 +155,14 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
   // se adivina la letra
   useEffect(() => {
     if (prediction && letter === prediction) {
-      if (!appliedChange) { setCorrect(true); addScore(score); setAppliedChange(true); console.log('correct'); }
+      if (!appliedChange) { setCorrect(true); addScore(score); setAppliedChange(true); 
+        if (letter === 'V') { addCount_v(); }
+        console.log('correct'); 
+      }
 
     } else {
-      if (!appliedChange && incorrect) { loseLife(); setAppliedChange(true); console.log('loselife'); }
+      if (!appliedChange && incorrect) { loseLife(); setAppliedChange(true); 
+        console.log('loselife'); }
       
       setBackground('white');
     }

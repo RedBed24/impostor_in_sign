@@ -75,7 +75,7 @@ export const GamePlay: React.FC = () => {
             });
             const data = await response.json();
             setPrediction(data.prediction);
-            console.log('Respuesta del backend:', data);
+            //console.log('Respuesta del backend:', data);
             setError(null);
         } catch (error) {
             console.error('Error al enviar al backend:', error);
