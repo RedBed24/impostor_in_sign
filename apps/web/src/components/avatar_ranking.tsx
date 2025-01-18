@@ -7,7 +7,7 @@ interface Avatar_RakingProps {
 }
 
 export const Avatar_Raking: React.FC<Avatar_RakingProps> = ({ position }) => {
-  const { achieved_v, score } = GameState();
+  const { achieved_v, score, achieved_protector } = GameState();
     const generateRandomNumber = () => {
         return Math.floor(Math.random() * 16) + 1; //[1,16]
     };
@@ -17,7 +17,7 @@ export const Avatar_Raking: React.FC<Avatar_RakingProps> = ({ position }) => {
     const insignias = [
       { name: '100: Misión Cumplida', achieved: score >= 100, path:'100.png' },
       { name: 'Maestro de la V', achieved: achieved_v, path: 'gesto.png' },
-      { name: 'Protector', achieved: false, path:'shield.png' },
+      { name: 'Protector', achieved: achieved_protector, path:'shield.png' },
       { name: 'Rescate Relámpago', achieved: false, path:'time.png' },
       { name: 'En el Olimpo', achieved: false , path:'trophy.png' },
     ];

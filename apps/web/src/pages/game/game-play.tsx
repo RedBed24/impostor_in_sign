@@ -21,7 +21,7 @@ export const GamePlay: React.FC = () => {
     const [prediction, setPrediction] = useState<string | null>(null);
     const [isCameraReady, setCameraReady] = useState(false);
     const [isPaused, setIsPaused] = useState(true);
-    const { lives, score, level, mode } = GameState();
+    const { lives, score, level, mode, combo } = GameState();
     const [currentLetter, setCurrentLetter] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [helpOpen, setHelpOpen] = useState(true);
@@ -164,7 +164,10 @@ export const GamePlay: React.FC = () => {
                         </Group>
                     </Grid.Col>
                     <Grid.Col span={4} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                        <Text fz={30} c='white' mr={50}>SCORE: {score}</Text>
+                        <Stack gap={0}>
+                        <Text fz={30} c='white' mr={50}>🔸SCORE: {score} </Text>
+                        <Text fz={27} c='white' mr={50}>🔥COMBO: {combo} </Text>
+                        </Stack>
                         <Button size="xl" onClick={() => setIsPaused(true)}><Pause /> </Button>
                     </Grid.Col>
                     <Grid.Col style={{ position: 'absolute', top: '51%' }}>
