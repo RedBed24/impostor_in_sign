@@ -16,8 +16,7 @@ export const HelpMenu: React.FC<HelpMenuProps> = ({handleClose = () => {}}) => {
           title: "🎉 Primeros pasos en el juego 🎉",
           description:(
             <Flex align='center' gap='md'>
-            <Text>
-            Este es un tutorial rápido para que aprendas a jugar. Puedes cerrarlo en cualquier momento pulsando en la ❌ de la esquina.</Text>
+            Este es un tutorial rápido para que aprendas a jugar. Puedes cerrarlo en cualquier momento pulsando en la ❌ de la esquina.
             <Image m={0} src='/src/assets/amongus/stickers/2.png' h={90} w={90} fit='contain'/>
             </Flex>
             ),
@@ -26,9 +25,9 @@ export const HelpMenu: React.FC<HelpMenuProps> = ({handleClose = () => {}}) => {
           title: "💠 Modos de juego 💠",
           description: (
             <Text>
-              🎓El modo <Badge color='green'>Aprender</Badge> incluye fotos de los gestos para que aprendas mientras juegas.<br/>
+              🎓El modo <Badge color='green' component='span'>Aprender</Badge> incluye fotos de los gestos para que aprendas mientras juegas.<br/>
               <br/>
-              🧠El modo <Badge color='blue'>Memorizar</Badge> no incluye ninguna ayuda y tendrás que usar solo tu memoria.
+              🧠El modo <Badge color='blue' component='span'>Memorizar</Badge> no incluye ninguna ayuda y tendrás que usar solo tu memoria.
             </Text>
           ),
         },
@@ -36,10 +35,19 @@ export const HelpMenu: React.FC<HelpMenuProps> = ({handleClose = () => {}}) => {
           title:  "🎮 Cómo jugar 🎮",
           description:(
             <Flex gap='md' direction='column' align='center'>
-            <Text>
-            El juego consiste en evitar que el personaje caiga. Para salvarlo tienes que hacer el gesto de la letra que lleva. 
-            <Text fw={600}>Recuerda activar la cámara 📸</Text></Text>
+            El juego consiste en evitar que el personaje caiga. Para salvarlo tienes que hacer el gesto de la letra que lleva. Un sonido te indicará si lo has hecho bien o mal.<br/>
+            <Badge color="red" size="lg">Recuerda activar la cámara 📸</Badge>
             <Image h={100} w={250} src='src/assets/tutorial_estados.png'/>
+            </Flex>
+          ),
+            
+        },
+        {
+          title:  "🎮 Cómo jugar 🎮",
+          description:(
+            <Flex align='center' gap='md'>
+            El personaje amarillo aparece en el nivel 2 y te dará 5 puntos.<br/>
+            <Image h={70} w={70} src='src/assets/amongus/yellow/idle.png'/>
             </Flex>
           ),
             
@@ -78,7 +86,7 @@ export const HelpMenu: React.FC<HelpMenuProps> = ({handleClose = () => {}}) => {
           size="md"
         >
           <Stack gap="xl">
-            <Text>{steps[tutorialStep].description}</Text>
+            {steps[tutorialStep].description}
             {isLastStep && (<Button fullWidth
             onClick={()=> {handleClose();}}>
                 A Jugar

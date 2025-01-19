@@ -7,7 +7,12 @@ import { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import AmongusLetter from '../../components/amongus_letter';
 import GameState from '../../store/game-state';
 import { Results } from './results';
+import { LevelUp } from '../../components/level-up';
 import { HelpMenu } from './help-menu';
+import { GameOver } from '../../components/gameover';
+
+import correctSound from '../../assets/correct.mp3';
+import incorrectSound from '../../assets/incorrect.mp3';
 
 const videoConstraints = {
     width: 200,
@@ -21,10 +26,15 @@ export const GamePlay: React.FC = () => {
     const [prediction, setPrediction] = useState<string | null>(null);
     const [isCameraReady, setCameraReady] = useState(false);
     const [isPaused, setIsPaused] = useState(true);
-    const { lives, score, level, mode, combo } = GameState();
+    const { lives, score, nextLevel, level, mode, combo, scoreToLevel, yellowEvent, gameover } = GameState();
     const [currentLetter, setCurrentLetter] = useState<string | null>(null);
+    const [showLevelUp, setShowLevelUp] = useState(false);
+    const [levelChanged, setLevelChanged] = useState(false);
+    const [boxColor, setBoxColor] = useState('#4a90e2');
     const [error, setError] = useState<string | null>(null);
     const [helpOpen, setHelpOpen] = useState(true);
+    const [audioCorrect, setAudioCorrect] = useState(new Audio(correctSound));
+    const [audioIncorrect, setAudioIncorrect] = useState(new Audio(incorrectSound));
 
     const handleLetterGenerated = useCallback((letter: string) => {
         console.log('Letra generada:', letter);
@@ -44,6 +54,16 @@ export const GamePlay: React.FC = () => {
     //     };
     // }, []);
 
+    useEffect(() => {
+        if (score > 0 && score >= level*scoreToLevel && score < (level+1)*scoreToLevel  && !levelChanged) {
+            nextLevel();
+            setShowLevelUp(true);
+            setLevelChanged(true); 
+        }
+        if (score % 5 === 1) {
+            setLevelChanged(false);
+        }
+    }, [score, levelChanged, nextLevel]);
 
     const handleUserMedia = useCallback(() => {
         console.log("Cámara lista");
@@ -53,8 +73,9 @@ export const GamePlay: React.FC = () => {
 
     const captureFrame = useCallback(async () => {
         if (!webcamRef.current) return;
+        
 
-        const imageSrc = webcamRef.current.getScreenshot();
+        const imageSrc = webcamRef.current?.getScreenshot();
         if (!imageSrc) {
             console.error("No se pudo capturar una imagen desde la cámara.");
             setError("Error, no se puede acceder a la cámara");
@@ -75,10 +96,8 @@ export const GamePlay: React.FC = () => {
             });
             const data = await response.json();
             setPrediction(data.prediction);
-            //console.log('Respuesta del backend:', data);
             setError(null);
         } catch (error) {
-            console.error('Error al enviar al backend:', error);
             setError('Error, el servidor no responde.');
             setIsPaused(true);
         }
@@ -90,7 +109,7 @@ export const GamePlay: React.FC = () => {
 
         const interval = setInterval(() => {
             captureFrame();
-        }, 700); // Ajustar para capturar cada segundo
+        }, 100); // Ajustar para capturar cada segundo
 
         return () => clearInterval(interval);
     }, [isCameraReady, captureFrame]);
@@ -105,13 +124,22 @@ export const GamePlay: React.FC = () => {
         }
         return new Blob([ab], { type: mimeString });
     }
+    
+    const changeBoxColor = useCallback((color: string) => {
+        setBoxColor(color);
+        if (color === 'red') {
+            audioIncorrect.play();
+        } else if (color === 'lime') {
+            audioCorrect.play();
+        }
+        setTimeout(() => changeBoxColor('#4a90e2'), 900);
+      }, []);
 
     const imageSrc = useMemo(() => `/src/assets/letters/${currentLetter}.png`, [currentLetter]);
 
-    if (lives < 1) {
+    if (gameover) {
         return <Results />;
     }
-
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     return (
@@ -125,9 +153,11 @@ export const GamePlay: React.FC = () => {
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat',
                     display: 'flex',
-                    flexDirection: 'column'
+                    flexDirection: 'column',
                 }}
             >
+                {showLevelUp && <LevelUp onComplete={()=> setShowLevelUp(false)} />}
+                {lives < 1 && <GameOver onComplete={()=> console.log('gameover')} />}
                 <Grid p={0}>
                     <Grid.Col span={8} mt={30}>
                         <Group style={{ width: '100%' }} display='flex' align='flex-start'>
@@ -143,7 +173,7 @@ export const GamePlay: React.FC = () => {
                             <Box ml={60}
                                 style={{
                                     height: "210px",
-                                    border: "5px solid #4a90e2",
+                                    border: `5px solid ${boxColor}`,
                                     borderRadius: "10px",
                                 }}>
                                 <Webcam
@@ -156,30 +186,34 @@ export const GamePlay: React.FC = () => {
                                     onUserMedia={handleUserMedia}
                                 />
                             </Box>
-                            <Stack>
-                                <Text fz={30} c='white'>PREDICTION: {prediction}</Text>
-                                {mode === 'learn' && <Image width={50} height={50} src={imageSrc} fit='contain' />}
+                            <Stack gap={0}>
+                                <Text fz={30} c='white'>LETRA</Text>
+                                {mode === 'learn' && <Image width={100} height={100} src={imageSrc} fit='contain'/>}
                             </Stack>
 
                         </Group>
                     </Grid.Col>
                     <Grid.Col span={4} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                        <Stack gap={0}>
-                        <Text fz={30} c='white' mr={50}>🔸SCORE: {score} </Text>
-                        <Text fz={27} c='white' mr={50}>🔥COMBO: {combo} </Text>
+                        <Stack mr={50} gap={0}>
+                        <Text fz={30} c='white'>🔸SCORE: {score} </Text>
+                        <Text fz={30} c='white'>🔥COMBO: {combo} </Text>
+                        <Text fz={30} c='white'>LEVEL: {level}</Text>
                         </Stack>
                         <Button size="xl" onClick={() => setIsPaused(true)}><Pause /> </Button>
                     </Grid.Col>
                     <Grid.Col style={{ position: 'absolute', top: '51%' }}>
-                        <AmongusLetter prediction={prediction} speed={3} isPaused={isPaused} color='red'
-                            onLetterGenerated={handleLetterGenerated} />
-                        {score >= 10 && score < 30 && <AmongusLetter prediction={prediction} speed={4} isPaused={isPaused} color='yellow'
-                            onLetterGenerated={handleLetterGenerated} />}
+                        <AmongusLetter prediction={prediction} speed={3} isPaused={isPaused} color={level % 2 === 1 ? 'red' : 'white'} 
+                        onLetterGenerated={handleLetterGenerated}
+                        changeBoxColor={changeBoxColor}/>
+                        {level >= yellowEvent[0] && level < yellowEvent[1] && <AmongusLetter prediction={prediction} speed={3} isPaused={isPaused} color='yellow' 
+                        onLetterGenerated={handleLetterGenerated}
+                        changeBoxColor={changeBoxColor}/>}
                     </Grid.Col>
                 </Grid>
 
 
-                <Modal opened={isPaused} onClose={() => setIsPaused(false)} title="Menú de Pausa" centered
+                <Modal opened={isPaused} onClose={() => setIsPaused(false)} title={`MODO DE JUEGO ${mode === 'learn' ? 'APRENDIZAJE' : 'MEMORIZAR'}  -  Menú de Pausa`} 
+                    centered
                     overlayProps={{
                         backgroundOpacity: 0.55,
                         blur: 1,

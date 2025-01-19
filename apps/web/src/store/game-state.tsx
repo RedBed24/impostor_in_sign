@@ -10,6 +10,9 @@ interface GameState {
   combo: number; // Contador de combos, con un fallo se reinicia
   achieved_protector: boolean; // logro de combo
   achieved_top: boolean; // top3
+  scoreToLevel: number; // Cada X puntos se sube de nivel
+  yellowEvent: [number, number]; // Evento amarillo, [nivel inicio, nivel fin]
+  gameover: boolean; // Juego terminado
 
   // Acciones
   loseLife: () => void;
@@ -19,6 +22,7 @@ interface GameState {
   changeModeLearn: () => void;
   changeModeMem: () => void;
   addCount_v: () => void;
+  amongusDied: () => void;
 }
 
 const GameState = create<GameState>((set) => ({
@@ -31,7 +35,17 @@ const GameState = create<GameState>((set) => ({
   combo: 0,
   achieved_protector: false,
   achieved_top: false,
+  scoreToLevel: 10,
+  yellowEvent: [2, 5],
+  gameover: false,
 
+  amongusDied: () => set((state) => {
+    if (state.lives === 0) {
+      console.log('gameover');
+      return { gameover: true };
+    }
+    return {};
+  }),
   changeModeLearn: () => set(() => {
     console.log('changeModeLearn');
     return { mode: 'learn' };
@@ -80,6 +94,7 @@ const GameState = create<GameState>((set) => ({
       combo: 0,
       achieved_protector: false,
       achieved_top: false,
+      gameover: false,
     };
   }),
 }));

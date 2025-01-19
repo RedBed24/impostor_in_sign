@@ -8,10 +8,11 @@ interface AmongusLetterProps {
   speed: number;
   isPaused: boolean;
   color: string | null;
+  changeBoxColor: (color: string) => void;
   onLetterGenerated: (letter: string) => void;
 }
 
-const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaused, color = 'red', onLetterGenerated}) => {
+const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaused, color = 'red', onLetterGenerated, changeBoxColor}) => {
   const [correct, setCorrect] = useState<boolean>(false);
   const [incorrect, setIncorrect] = useState<boolean>(false);
   const [letter, setLetter] = useState<string>('');
@@ -51,7 +52,7 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
 
   const [appliedChange, setAppliedChange] = useState<boolean>(false);
 
-  const { loseLife, addScore, addCount_v } = GameState();
+  const { loseLife, addScore, addCount_v, amongusDied } = GameState();
 
   const calculateInitialVerticalPosition = () => {
     if (containerRef.current) {
@@ -118,8 +119,10 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
             setVerticalPosition((prev) => prev + 2);
           }
         }
-
-        if ((newPosition > window.innerWidth - 100 || verticalPosition > 200)
+        
+        // console.log('newPosition', newPosition);
+        // console.log('vertical', verticalPosition);
+        if ((newPosition > window.innerWidth - 100 || verticalPosition > 130)
           && !resetCalledRef.current) {
           resetCalledRef.current = true;
           if (!appliedChange) {
@@ -127,6 +130,7 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
             setAppliedChange(true);
         }
           reset();
+          amongusDied();
           return -150; // Vuelve a la izquierda, fuera de la pantalla
         }
         return newPosition;
@@ -158,11 +162,14 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
       if (!appliedChange) { setCorrect(true); addScore(score); setAppliedChange(true); 
         if (letter === 'V') { addCount_v(); }
         console.log('correct'); 
+        changeBoxColor('lime');
       }
 
     } else {
       if (!appliedChange && incorrect) { loseLife(); setAppliedChange(true); 
-        console.log('loselife'); }
+        console.log('loselife');
+        changeBoxColor('red');
+      }
       
       setBackground('white');
     }
@@ -203,7 +210,7 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
 
             {background === 'red' && movingVertically ? (
             <Image
-              src={`/src/assets/amongus/red/idle.png`}
+              src={`/src/assets/amongus/${color}/idle.png`}
               alt={`Other Image`}
               height="auto"
               width="auto"
