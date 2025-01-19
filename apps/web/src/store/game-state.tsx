@@ -5,6 +5,9 @@ interface GameState {
   score: number; // Puntuación actual
   level: number; // Nivel del juego
   mode: 'learn' | 'memorize'; // Modo de juego
+  scoreToLevel: number; // Cada X puntos se sube de nivel
+  yellowEvent: [number, number]; // Evento amarillo, [nivel inicio, nivel fin]
+  gameover: boolean; // Juego terminado
 
   // Acciones
   loseLife: () => void;
@@ -13,6 +16,7 @@ interface GameState {
   resetGame: () => void;
   changeModeLearn: () => void;
   changeModeMem: () => void;
+  amongusDied: () => void;
 }
 
 const GameState = create<GameState>((set) => ({
@@ -20,7 +24,17 @@ const GameState = create<GameState>((set) => ({
   score: 0,
   level: 1,
   mode: 'learn',
+  scoreToLevel: 10,
+  yellowEvent: [2, 5],
+  gameover: false,
 
+  amongusDied: () => set((state) => {
+    if (state.lives === 0) {
+      console.log('gameover');
+      return { gameover: true };
+    }
+    return {};
+  }),
   changeModeLearn: () => set(() => {
     console.log('changeModeLearn');
     return { mode: 'learn' };
@@ -50,6 +64,7 @@ const GameState = create<GameState>((set) => ({
       lives: 3,
       score: 0,
       level: 1,
+      gameover: false,
     };
   }),
 }));
