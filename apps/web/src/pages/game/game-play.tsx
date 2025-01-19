@@ -1,5 +1,5 @@
-import { Text, Group, Box, BackgroundImage, Grid, Button, Modal, Stack, Image } from '@mantine/core';
-import { Pause, Play, LogOut } from 'lucide-react';
+import { Text, Group, Box, BackgroundImage, Grid, Button, Modal, Stack, Image, Alert } from '@mantine/core';
+import { Pause, Play, LogOut, HelpCircle, XCircle } from 'lucide-react';
 import { Link } from 'wouter';
 
 import Webcam from "react-webcam";
@@ -8,6 +8,7 @@ import AmongusLetter from '../../components/amongus_letter';
 import GameState from '../../store/game-state';
 import { Results } from './results';
 import { LevelUp } from '../../components/level-up';
+import { HelpMenu } from './help-menu';
 
 const videoConstraints = {
     width: 200,
@@ -26,9 +27,11 @@ export const GamePlay: React.FC = () => {
     const [showLevelUp, setShowLevelUp] = useState(false);
     const [levelChanged, setLevelChanged] = useState(false);
     const [boxColor, setBoxColor] = useState('#4a90e2');
+    const [error, setError] = useState<string | null>(null);
+    const [helpOpen, setHelpOpen] = useState(true);
 
     const handleLetterGenerated = useCallback((letter: string) => {
-        console.log('Letra generada:', letter); 
+        console.log('Letra generada:', letter);
         setCurrentLetter(letter);
     }, []);
 
@@ -55,15 +58,52 @@ export const GamePlay: React.FC = () => {
         }
     }, [score, levelChanged, nextLevel]);
 
-    const handleUserMedia = () => {
+    const handleUserMedia = useCallback(() => {
         console.log("Cámara lista");
         setCameraReady(true);
-    };
+    }, []);
+
+
+    const captureFrame = useCallback(async () => {
+        if (!webcamRef.current) return;
+
+        const imageSrc = webcamRef.current.getScreenshot();
+        if (!imageSrc) {
+            console.error("No se pudo capturar una imagen desde la cámara.");
+            setError("Error, no se puede acceder a la cámara");
+            setIsPaused(true);
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', dataURItoBlob(imageSrc), 'screenshot.jpg');
+        if (currentLetter) {
+            formData.append('label', currentLetter);
+        }
+
+        try {
+            const response = await fetch('/predict', {
+                method: 'POST',
+                body: formData,
+            });
+            const data = await response.json();
+            setPrediction(data.prediction);
+            console.log('Respuesta del backend:', data);
+            setError(null);
+        } catch (error) {
+            console.error('Error al enviar al backend:', error);
+            setError('Error, el servidor no responde.');
+            setIsPaused(true);
+        }
+    }, [currentLetter]);
+
 
     useEffect(() => {
         if (!isCameraReady) return;
 
-        let running = true;
+        const interval = setInterval(() => {
+            captureFrame();
+        }, 700); // Ajustar para capturar cada segundo
 
         const captureAndSendFrame = async () => {
             await new Promise(resolve => setTimeout(resolve, 50)); //cambia demasiado
@@ -121,6 +161,8 @@ export const GamePlay: React.FC = () => {
         setTimeout(() => changeBoxColor('#4a90e2'), 700);
       }, []);
 
+    const imageSrc = useMemo(() => `/src/assets/letters/${currentLetter}.png`, [currentLetter]);
+
     if (lives < 1) {
         return <Results />;
     }
@@ -133,7 +175,7 @@ export const GamePlay: React.FC = () => {
                 src="/src/assets/fondo_bloques.png"
                 style={{
                     width: '99vw',
-                    height: '98vh',
+                    height: '99vh',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat',
@@ -150,9 +192,9 @@ export const GamePlay: React.FC = () => {
                                 border: "3px solid #FFFFFF",
                                 borderRadius: "15px", align: 'flex-start', marginLeft: 30, marginRight: 150
                             }}>
-                                <Image width={50} height={50} src={lives >= 1 ? "/src/assets/vida.png" : "/src/assets/muerte.png"} />
-                                <Image width={50} height={50} src={lives >= 2 ? "/src/assets/vida.png" : "/src/assets/muerte.png"} />
-                                <Image width={50} height={50} src={lives == 3 ? "/src/assets/vida.png" : "/src/assets/muerte.png"} />
+                                <Image width={50} height={50} alt='live1' src={lives >= 1 ? "/src/assets/vida.png" : "/src/assets/muerte.png"} />
+                                <Image width={50} height={50} alt='live2' src={lives >= 2 ? "/src/assets/vida.png" : "/src/assets/muerte.png"} />
+                                <Image width={50} height={50} alt='live3' src={lives == 3 ? "/src/assets/vida.png" : "/src/assets/muerte.png"} />
                             </Box>
                             <Box ml={60}
                                 style={{
@@ -172,7 +214,7 @@ export const GamePlay: React.FC = () => {
                             </Box>
                             <Stack gap={0}>
                                 <Text fz={30} c='white'>LETRA</Text>
-                                {mode === 'learn' && <Image width={150} height={150} src={`/src/assets/letters/${currentLetter}.jpg`} fit='contain'/>}
+                                {mode === 'learn' && <Image width={50} height={50} src={imageSrc} fit='contain'/>}
                             </Stack>
 
                         </Group>
@@ -203,13 +245,20 @@ export const GamePlay: React.FC = () => {
                     }}>
                     <Stack>
                         <Button onClick={() => setIsPaused(false)} rightSection={<Play />}>JUGAR</Button>
+                        <Button onClick={() => setHelpOpen(true)} rightSection={<HelpCircle />} variant='outline'>AYUDA</Button>
                         <Link href='/game'>
-                        <Button color='red' w='100%' rightSection={<LogOut />}>SALIR</Button>
+                            <Button color='red' w='100%' rightSection={<LogOut />}>SALIR</Button>
                         </Link>
-                        
+                        {error && (
+                            <Alert color="rgba(255, 0, 0, 1)" title="Error" 
+                                onClose={() => setError(null)}
+                                icon={<XCircle color='red' />}>
+                            {error}
+                            </Alert>
+                        )}
                     </Stack>
-
                 </Modal>
+                {helpOpen && <HelpMenu handleClose={() => setHelpOpen(false)} />}
             </BackgroundImage>
         </>
     );

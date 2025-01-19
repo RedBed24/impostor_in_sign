@@ -1,8 +1,8 @@
 """Module to detect hand points using MediaPipe Hands."""
 
+import mediapipe as mp
 from typing import Any
 import cv2
-import mediapipe as mp
 import numpy as np
 
 
@@ -38,11 +38,8 @@ class HandPointsDetector:
         if results.multi_hand_landmarks is None:
             return None
 
-        all_x = []
-        all_y = []
-        # Get all the 21 x and y coordinates of the hand
-        for hand_landmarks in results.multi_hand_landmarks:
-            for i in range(len(hand_landmarks.landmark)):
-                all_x.append(hand_landmarks.landmark[i].x)
-                all_y.append(hand_landmarks.landmark[i].y)
+         # Get all the 21 x and y coordinates of the hand
+        all_x = [landmark.x for hand_landmarks in results.multi_hand_landmarks for landmark in hand_landmarks.landmark]
+        all_y = [landmark.y for hand_landmarks in results.multi_hand_landmarks for landmark in hand_landmarks.landmark]
+
         return (all_x, all_y)

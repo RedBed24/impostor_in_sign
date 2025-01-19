@@ -17,7 +17,6 @@ dependencies = [
     "logging==0.4.9.6",
     "pydantic==2.9.2",
     "fastapi[standard]",
-    "mediapipe==0.10.18",
     "scikit-learn==1.5.2",
     "hand_detector",
     "pandas==2.2.3",

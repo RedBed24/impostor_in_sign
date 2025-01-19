@@ -90,10 +90,20 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
         const newPosition = prevPosition + speed;
 
         // Iniciar el movimiento vertical en el medio de la pantalla
-        if (newPosition >= window.innerWidth * 0.5 && newPosition <= window.innerWidth * 0.70) {
-          setMovingVertically(true);
-        } else {
-          setMovingVertically(false);
+        if (!incorrect){
+          if (newPosition >= window.innerWidth * 0.5 && newPosition <= window.innerWidth * 0.70) {
+            setMovingVertically(true);
+          } else {
+            setMovingVertically(false);
+          }
+        }
+
+        if (incorrect) {
+          if (newPosition >= window.innerWidth * 0.65 && newPosition <= window.innerWidth * 0.9) {
+            setMovingVertically(true);
+          } else {
+            setMovingVertically(false);
+          }
         }
 
         if (movingVertically) {
@@ -106,7 +116,7 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
           } else {
             setIncorrect(true);
             setBackground('red');
-            setVerticalPosition((prev) => prev + speed);
+            setVerticalPosition((prev) => prev + 2);
           }
         }
         
@@ -136,9 +146,10 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
   }, [speed, movingVertically, correct, verticalPosition, isPaused, loseLife, reset]);
 
   // Usar React Spring para animar el movimiento
-  const { left } = useSpring({
+  const { left, top, rotate } = useSpring({
     left: position,
     top: verticalPosition,
+    rotate: background === 'red' && movingVertically ? -90 : 0,
     config: { tension: 170, friction: 26 },
     pause: isPaused,
   });
@@ -166,7 +177,9 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
         style={{
           position: 'absolute',
           left: left, 
-          top: verticalPosition, 
+          top: top, 
+          transform: rotate.to((r) => `rotate(${r}deg)`),
+          transformOrigin: 'center bottom',
           opacity: position >= 0 ? 1 : 0, // Evita que sea visible cuando está fuera de la pantalla
         }}
       >
@@ -191,15 +204,15 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
             {letter}
           </Box>}
 
-          {background === 'red' ? (
+            {background === 'red' && movingVertically ? (
             <Image
-            src={`/src/assets/amongus/red/idle.png`}
-            alt={`Other Image`}
-            height="auto"
-            width="auto"
-            m={0}
-          />
-          ) : (
+              src={`/src/assets/amongus/red/idle.png`}
+              alt={`Other Image`}
+              height="auto"
+              width="auto"
+              m={0}
+            />
+            ) : (
             <Image
               src={`/src/assets/amongus/${color}/Walk000${imageIndex}.png`}
               alt={`Letter ${letter}`}
@@ -207,8 +220,7 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
               width="auto"
               m={0}
             />
-            
-          )}
+            )}
         </Stack>
       </animated.div>
     </>
