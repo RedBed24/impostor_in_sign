@@ -196,7 +196,7 @@ export const GamePlay: React.FC = () => {
                     <Grid.Col span={4} style={{ display: 'flex', justifyContent: 'flex-end' }}>
                         <Stack mr={50} gap={0}>
                         <Text fz={30} c='white'>🔹LEVEL: {level}</Text>
-                        <Text fz={30} c='white'>🔸SCORE: {score} </Text>
+                        <Text fz={28} c='white'>🔥COMBO: {combo} </Text>
                         </Stack>
                         <Button size="xl" onClick={() => setIsPaused(true)}><Pause /> </Button>
                     </Grid.Col>
