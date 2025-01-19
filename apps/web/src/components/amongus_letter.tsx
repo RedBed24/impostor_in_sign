@@ -28,7 +28,7 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
 
   const generateRandomLetter = useCallback(() => {
     // const letters = 'ABCDEFGHIKLMNOPRSTUVWXYZ';
-    const letters = 'V';
+    const letters = 'ABCDEFGIKLMNORSTUVWXYZ';
     const randomLetter = letters[Math.floor(Math.random() * letters.length)];
     setLetter(randomLetter);
     onLetterGenerated(randomLetter);
