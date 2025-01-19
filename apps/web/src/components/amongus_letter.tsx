@@ -52,7 +52,7 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
 
   const [appliedChange, setAppliedChange] = useState<boolean>(false);
 
-  const { loseLife, addScore } = GameState();
+  const { loseLife, addScore, amongusDied } = GameState();
 
   const calculateInitialVerticalPosition = () => {
     if (containerRef.current) {
@@ -122,7 +122,7 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
         
         // console.log('newPosition', newPosition);
         // console.log('vertical', verticalPosition);
-        if ((newPosition > window.innerWidth - 100 || verticalPosition > 120)
+        if ((newPosition > window.innerWidth - 100 || verticalPosition > 130)
           && !resetCalledRef.current) {
           resetCalledRef.current = true;
           if (!appliedChange) {
@@ -130,6 +130,7 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
             setAppliedChange(true);
         }
           reset();
+          amongusDied();
           return -150; // Vuelve a la izquierda, fuera de la pantalla
         }
         return newPosition;
@@ -206,7 +207,7 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
 
             {background === 'red' && movingVertically ? (
             <Image
-              src={`/src/assets/amongus/red/idle.png`}
+              src={`/src/assets/amongus/${color}/idle.png`}
               alt={`Other Image`}
               height="auto"
               width="auto"

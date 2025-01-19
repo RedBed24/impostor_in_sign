@@ -9,6 +9,7 @@ import GameState from '../../store/game-state';
 import { Results } from './results';
 import { LevelUp } from '../../components/level-up';
 import { HelpMenu } from './help-menu';
+import { GameOver } from '../../components/gameover';
 
 const videoConstraints = {
     width: 200,
@@ -22,7 +23,7 @@ export const GamePlay: React.FC = () => {
     const [prediction, setPrediction] = useState<string | null>(null);
     const [isCameraReady, setCameraReady] = useState(false);
     const [isPaused, setIsPaused] = useState(true);
-    const { lives, score, nextLevel, level, mode, scoreToLevel, yellowEvent } = GameState();
+    const { lives, score, nextLevel, level, mode, scoreToLevel, yellowEvent, gameover } = GameState();
     const [currentLetter, setCurrentLetter] = useState<string | null>(null);
     const [showLevelUp, setShowLevelUp] = useState(false);
     const [levelChanged, setLevelChanged] = useState(false);
@@ -67,7 +68,7 @@ export const GamePlay: React.FC = () => {
     const captureFrame = useCallback(async () => {
         if (!webcamRef.current) return;
 
-        const imageSrc = webcamRef.current.getScreenshot();
+        const imageSrc = webcamRef.current?.getScreenshot();
         if (!imageSrc) {
             console.error("No se pudo capturar una imagen desde la cámara.");
             setError("Error, no se puede acceder a la cámara");
@@ -101,7 +102,7 @@ export const GamePlay: React.FC = () => {
 
         const interval = setInterval(() => {
             captureFrame();
-        }, 50); // Ajustar para capturar cada segundo
+        }, 100); // Ajustar para capturar cada segundo
 
         return () => clearInterval(interval);
     }, [isCameraReady, captureFrame]);
@@ -119,12 +120,12 @@ export const GamePlay: React.FC = () => {
     
     const changeBoxColor = useCallback((color: string) => {
         setBoxColor(color);
-        setTimeout(() => changeBoxColor('#4a90e2'), 700);
+        setTimeout(() => changeBoxColor('#4a90e2'), 900);
       }, []);
 
     const imageSrc = useMemo(() => `/src/assets/letters/${currentLetter}.png`, [currentLetter]);
 
-    if (lives < 1) {
+    if (gameover) {
         return <Results />;
     }
 
@@ -145,6 +146,7 @@ export const GamePlay: React.FC = () => {
                 }}
             >
                 {showLevelUp && <LevelUp onComplete={()=> setShowLevelUp(false)} />}
+                {lives < 1 && <GameOver onComplete={()=> console.log('gameover')} />}
                 <Grid p={0}>
                     <Grid.Col span={8} mt={30}>
                         <Group style={{ width: '100%' }} display='flex' align='flex-start'>
@@ -187,7 +189,7 @@ export const GamePlay: React.FC = () => {
                         </Stack>
                         <Button size="xl" onClick={() => setIsPaused(true)}><Pause /> </Button>
                     </Grid.Col>
-                    <Grid.Col style={{ position: 'absolute', top: '57%' }}>
+                    <Grid.Col style={{ position: 'absolute', top: '51%' }}>
                         <AmongusLetter prediction={prediction} speed={3} isPaused={isPaused} color={level % 2 === 1 ? 'red' : 'white'} 
                         onLetterGenerated={handleLetterGenerated}
                         changeBoxColor={changeBoxColor}/>
