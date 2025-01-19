@@ -52,7 +52,7 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
 
   const [appliedChange, setAppliedChange] = useState<boolean>(false);
 
-  const { loseLife, addScore, amongusDied } = GameState();
+  const { loseLife, addScore, addCount_v, amongusDied } = GameState();
 
   const calculateInitialVerticalPosition = () => {
     if (containerRef.current) {
@@ -159,12 +159,15 @@ const AmongusLetter: React.FC<AmongusLetterProps> = ({ prediction, speed, isPaus
   // se adivina la letra
   useEffect(() => {
     if (prediction && letter === prediction) {
-      if (!appliedChange) { setCorrect(true); addScore(score); setAppliedChange(true); console.log('correct');
+      if (!appliedChange) { setCorrect(true); addScore(score); setAppliedChange(true); 
+        if (letter === 'V') { addCount_v(); }
+        console.log('correct'); 
         changeBoxColor('lime');
-       }
+      }
 
     } else {
-      if (!appliedChange && incorrect) { loseLife(); setAppliedChange(true); console.log('loselife'); 
+      if (!appliedChange && incorrect) { loseLife(); setAppliedChange(true); 
+        console.log('loselife');
         changeBoxColor('red');
       }
       

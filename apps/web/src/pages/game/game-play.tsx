@@ -26,7 +26,7 @@ export const GamePlay: React.FC = () => {
     const [prediction, setPrediction] = useState<string | null>(null);
     const [isCameraReady, setCameraReady] = useState(false);
     const [isPaused, setIsPaused] = useState(true);
-    const { lives, score, nextLevel, level, mode, scoreToLevel, yellowEvent, gameover } = GameState();
+    const { lives, score, nextLevel, level, mode, combo, scoreToLevel, yellowEvent, gameover } = GameState();
     const [currentLetter, setCurrentLetter] = useState<string | null>(null);
     const [showLevelUp, setShowLevelUp] = useState(false);
     const [levelChanged, setLevelChanged] = useState(false);
@@ -195,8 +195,8 @@ export const GamePlay: React.FC = () => {
                     </Grid.Col>
                     <Grid.Col span={4} style={{ display: 'flex', justifyContent: 'flex-end' }}>
                         <Stack mr={50} gap={0}>
-                        <Text fz={30} c='white'>LEVEL: {level}</Text>
-                        <Text fz={28} c='white'>SCORE: {score}</Text>
+                        <Text fz={30} c='white'>🔹LEVEL: {level}</Text>
+                        <Text fz={30} c='white'>🔸SCORE: {score} </Text>
                         </Stack>
                         <Button size="xl" onClick={() => setIsPaused(true)}><Pause /> </Button>
                     </Grid.Col>
