@@ -24,7 +24,7 @@ export const Results: React.FC = () => {
     if (name.trim() !== "") {
       setOpened(false);
       const positionl = users.findIndex((user) => user.score < score);
-      setPosition(positionl === -1 ? users.length : positionl + 1);
+      setPosition((positionl === -1 ? users.length : positionl) + 1);
       users.splice(positionl === -1 ? users.length : positionl, 0, { name: name, score: score });
       localStorage.setItem('users', JSON.stringify(users));
       if (-1 < positionl && positionl < 3) {
