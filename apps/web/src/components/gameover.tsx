@@ -37,7 +37,7 @@ export const GameOver: React.FC<gameoverProps> = ({onComplete}) => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        fontSize: '4em',
+        fontSize: '5em',
         zIndex: 999,
       }}
     >

@@ -11,6 +11,9 @@ import { LevelUp } from '../../components/level-up';
 import { HelpMenu } from './help-menu';
 import { GameOver } from '../../components/gameover';
 
+import correctSound from '../../assets/correct.mp3';
+import incorrectSound from '../../assets/incorrect.mp3';
+
 const videoConstraints = {
     width: 200,
     height: 200,
@@ -30,6 +33,8 @@ export const GamePlay: React.FC = () => {
     const [boxColor, setBoxColor] = useState('#4a90e2');
     const [error, setError] = useState<string | null>(null);
     const [helpOpen, setHelpOpen] = useState(true);
+    const [audioCorrect, setAudioCorrect] = useState(new Audio(correctSound));
+    const [audioIncorrect, setAudioIncorrect] = useState(new Audio(incorrectSound));
 
     const handleLetterGenerated = useCallback((letter: string) => {
         console.log('Letra generada:', letter);
@@ -48,6 +53,7 @@ export const GamePlay: React.FC = () => {
     //         window.removeEventListener('keydown', handleKeyDown);
     //     };
     // }, []);
+
     useEffect(() => {
         if (score > 0 && score >= level*scoreToLevel && score < (level+1)*scoreToLevel  && !levelChanged) {
             nextLevel();
@@ -67,6 +73,7 @@ export const GamePlay: React.FC = () => {
 
     const captureFrame = useCallback(async () => {
         if (!webcamRef.current) return;
+        
 
         const imageSrc = webcamRef.current?.getScreenshot();
         if (!imageSrc) {
@@ -120,6 +127,11 @@ export const GamePlay: React.FC = () => {
     
     const changeBoxColor = useCallback((color: string) => {
         setBoxColor(color);
+        if (color === 'red') {
+            audioIncorrect.play();
+        } else if (color === 'lime') {
+            audioCorrect.play();
+        }
         setTimeout(() => changeBoxColor('#4a90e2'), 900);
       }, []);
 
@@ -129,7 +141,6 @@ export const GamePlay: React.FC = () => {
         return <Results />;
     }
 
-      
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     return (
         <>
