@@ -3,7 +3,7 @@ import { Pause, Play, LogOut, HelpCircle, XCircle } from 'lucide-react';
 import { Link } from 'wouter';
 
 import Webcam from "react-webcam";
-import { useRef, useState, useEffect, useCallback } from "react";
+import { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import AmongusLetter from '../../components/amongus_letter';
 import GameState from '../../store/game-state';
 import { Results } from './results';
@@ -103,47 +103,10 @@ export const GamePlay: React.FC = () => {
 
         const interval = setInterval(() => {
             captureFrame();
-        }, 700); // Ajustar para capturar cada segundo
+        }, 50); // Ajustar para capturar cada segundo
 
-        const captureAndSendFrame = async () => {
-            await new Promise(resolve => setTimeout(resolve, 50)); //cambia demasiado
-            if (!running || !webcamRef.current) return;
-
-            // Capturar la imagen de la cámara como una base64
-            const imageSrc = webcamRef.current?.getScreenshot();
-            if (!imageSrc) {
-                console.error("No se pudo capturar una imagen desde la cámara.");
-            }
-            if (imageSrc) {
-                const formData = new FormData();
-                formData.append('file', dataURItoBlob(imageSrc), 'screenshot.jpg');
-                if (currentLetter) {
-                    formData.append('label', currentLetter); 
-                }
-
-                try {
-                    // Enviar al backend
-                    const response = await fetch('/predict', {
-                        method: 'POST',
-                        body: formData,
-                    });
-                    const data = await response.json();
-                    setPrediction(data.prediction);
-                    // console.log('Respuesta del backend:', data);
-                } catch (error) {
-                    console.error('Error al enviar al backend:', error);
-                }
-            }
-
-            requestAnimationFrame(captureAndSendFrame);
-        };
-        captureAndSendFrame();
-
-        // Limpiar el bucle cuando se desmonte el componente
-        return () => {
-            running = false;
-        };
-    }, [isCameraReady, currentLetter]);
+        return () => clearInterval(interval);
+    }, [isCameraReady, captureFrame]);
 
     function dataURItoBlob(dataURI: string) {
         const byteString = atob(dataURI.split(',')[1]);
