@@ -23,6 +23,7 @@ interface GameState {
   changeModeMem: () => void;
   addCount_v: () => void;
   amongusDied: () => void;
+  achieveTop: () => void;
 }
 
 const GameState = create<GameState>((set) => ({
@@ -81,6 +82,11 @@ const GameState = create<GameState>((set) => ({
     const achieved_v = newCount_v >= 10;
     console.log('count_v:', newCount_v, 'achieved_v:', achieved_v);
     return { count_v: newCount_v, achieved_v };
+  }),
+
+  achieveTop: () => set(() => {
+    console.log('achieveTop');
+    return { achieved_top: true };
   }),
 
     resetGame: () => set(() => {

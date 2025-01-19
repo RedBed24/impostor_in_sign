@@ -12,7 +12,7 @@ export const Results: React.FC = () => {
   const [name, setName] = useState("");
   const [position, setPosition] = useState(-1);
 
-  const { score } = GameState();
+  const { score, achieveTop} = GameState();
 
   interface user {
     name: string;
@@ -27,6 +27,9 @@ export const Results: React.FC = () => {
       setPosition(positionl === -1 ? users.length : positionl + 1);
       users.splice(positionl === -1 ? users.length : positionl, 0, { name: name, score: score });
       localStorage.setItem('users', JSON.stringify(users));
+      if (-1 < positionl && positionl < 3) {
+        achieveTop();
+      }
     }
   };
 
