@@ -5,6 +5,7 @@ import Confetti from 'react-confetti';
 import GameState from '../../store/game-state';
 import { Avatar_Raking } from '../../components/avatar_ranking';
 import { Link } from 'wouter';
+import { Ranking } from '../../components/ranking';
 
 export const Results: React.FC = () => {
   const [opened, setOpened] = useState(true);
@@ -13,17 +14,21 @@ export const Results: React.FC = () => {
 
   const { score } = GameState();
 
+  interface user {
+    name: string;
+    score: number;
+  }
+  const users: user[] = localStorage.getItem('users') ? JSON.parse(localStorage.getItem('users') || "") : []
+
   const handleClose = () => {
     if (name.trim() !== "") {
       setOpened(false);
+      const positionl = users.findIndex((user) => user.score < score);
+      setPosition(positionl === -1 ? users.length : positionl + 1);
+      users.splice(positionl === -1 ? users.length : positionl, 0, { name: name, score: score });
+      localStorage.setItem('users', JSON.stringify(users));
     }
   };
-  const generateRandomNumber = () => {
-    return Math.floor(Math.random() * 100) + 1;
-  };
-  useEffect(() => {
-    setPosition(generateRandomNumber());
-  }, []);
 
   return (
     <>
@@ -70,30 +75,7 @@ export const Results: React.FC = () => {
               <Button size='xl' rightSection={<House />}>HOME</Button>
               </Link>
             </Group>
-              <Text fz={70} fw={500} variant="gradient"
-                gradient={{ from: 'blue', to: 'red', deg: 75 }}>RANKING</Text>
-              <Table highlightOnHover withTableBorder bg='gray' opacity='0.8' >
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th>Posición</Table.Th>
-                    <Table.Th>Nombre</Table.Th>
-                    <Table.Th>Puntuación</Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  <Table.Tr>
-                    <Table.Td>0</Table.Td>
-                    <Table.Td>Red Sus</Table.Td>
-                    <Table.Td>90</Table.Td>
-                  </Table.Tr>
-                <Table.Tr>
-                    <Table.Td>{position}</Table.Td>
-                    <Table.Td>{name}</Table.Td>
-                    <Table.Td>{score}</Table.Td>
-                  </Table.Tr>
-                </Table.Tbody>
-                {/* <Table.Tbody>{rows}</Table.Tbody> */}
-              </Table>
+            <Ranking users={users.slice(0, 9)} /> {/*.sort((a, b) => b.score - a.score)*/}
             </Stack>
           </Group>
         </BackgroundImage>
