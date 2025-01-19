@@ -88,10 +88,8 @@ export const GamePlay: React.FC = () => {
             });
             const data = await response.json();
             setPrediction(data.prediction);
-            console.log('Respuesta del backend:', data);
             setError(null);
         } catch (error) {
-            console.error('Error al enviar al backend:', error);
             setError('Error, el servidor no responde.');
             setIsPaused(true);
         }
@@ -177,7 +175,7 @@ export const GamePlay: React.FC = () => {
                             </Box>
                             <Stack gap={0}>
                                 <Text fz={30} c='white'>LETRA</Text>
-                                {mode === 'learn' && <Image width={50} height={50} src={imageSrc} fit='contain'/>}
+                                {mode === 'learn' && <Image width={100} height={100} src={imageSrc} fit='contain'/>}
                             </Stack>
 
                         </Group>
